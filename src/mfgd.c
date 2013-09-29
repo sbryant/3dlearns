@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
     point i = { 3.0, 4.0 };
     point p = { 1.0, 2.0 };
 
-    vector *v = point_sub(&p, &i);
+    vector *v = point_sub(&i, &p);
     vector *v_norm = vector_normalize(v);
 
     printf("View vector: (%.2f, %.2f)\n", v_norm->x, v_norm->y);
