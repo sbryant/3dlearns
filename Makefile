@@ -9,8 +9,8 @@ pkg-config = $(shell pkg-config --$(1) --static $(2))
 
 OBJS = $(patsubst %.c,%.o,$(SOURCES))
 CPPFLAGS = $(OPTCPPFLAGS)
-SDL_LIBS = $(call pkg-config,libs,SDL_image) $(call pkg-configs,libs,sdl)
-SDL_CFLAGS = $(call pkg-config,cflags,SDL_image) $(call pkg-configs,cflags,sdl)
+SDL_LIBS = $(call pkg-config,libs,SDL2_image) $(call pkg-configs,libs,sdl2)
+SDL_CFLAGS = $(call pkg-config,cflags,SDL2_image) $(call pkg-configs,cflags,sdl2)
 LIBS = $(call pkg-config,libs,glfw3) $(call pkg-config,libs,glew) $(SDL_LIBS) $(OPTLIBS)
 CFLAGS = -g -std=c99 $(call pkg-config,cflags,glfw3) $(call pkg-config,cflags,glew) $(SDL_CFLAGS) $(INCLUDE) -Wall -Werror $(OPTFLAGS) -O3
 
