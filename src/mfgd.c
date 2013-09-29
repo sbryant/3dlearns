@@ -93,7 +93,6 @@ vector *vector_normalize(vector* const v) {
 }
 
 int main(int argc, char** argv) {
-
     SDL_Init(SDL_INIT_VIDEO);
 
     /* Setup OpenGL 3.2 Context For OS X */
@@ -122,14 +121,6 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-
-    vector r = { 4.0, 0.0 };
-    vector d = { 0.0, -5.0 };
-
-    vector *v = vector_add(&d, &r);
-
-    printf("vector: (%.2f, %.2f)\n", v->x, v->y);
-
     while(true) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -157,7 +148,6 @@ int main(int argc, char** argv) {
             break;
     }
 
-    free(v);
     SDL_GL_DeleteContext(opengl3_context);
     SDL_DestroyWindow(screen);
     SDL_Quit();
