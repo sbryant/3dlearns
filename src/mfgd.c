@@ -40,6 +40,24 @@ float vector_length_square(vector* const v) {
     return (v->x * v->x) + (v->y * v->y);
 }
 
+vector* vector_add(vector* const v1, vector* const v2) {
+    vector *vr = (vector*)calloc(1, sizeof(vector));
+
+    vr->x = v1->x + v2->x;
+    vr->y = v1->y + v2->y;
+
+    return vr;
+}
+
+vector* vector_sub(vector* const v1, vector* const v2) {
+    vector *vr = (vector*)calloc(1, sizeof(vector));
+
+    vr->x = v1->x - v2->x;
+    vr->y = v1->y - v2->y;
+
+    return vr;
+}
+
 /* Vector scaling functions */
 
 vector *vector_mul_scalar(vector* const v, float const s) {
