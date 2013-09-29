@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
                                           SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL);
 
 
-    /* initialize a render context, mark as unusued to surpress warnings */
+    /* initialize a render context, managed by SDL */
     SDL_GLContext *opengl3_context = SDL_GL_CreateContext(screen);
 
     GLenum glew_status = glewInit();
