@@ -46,6 +46,15 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    /* Bail if we don't support OpenGL 3.2 */
+    if (!GLEW_VERSION_3_2) {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+                                 "OpenGL Error",
+                                 "OpenGL 3.2 is required.",
+                                 NULL);
+        return -1;
+    }
+
     while(true) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);
