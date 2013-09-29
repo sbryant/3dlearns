@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
 
 
     /* initialize a render context, mark as unusued to surpress warnings */
-    SDL_GLContext __attribute__((unused)) *opengl3_context = SDL_GL_CreateContext(screen);
+    SDL_GLContext *opengl3_context = SDL_GL_CreateContext(screen);
 
     GLenum glew_status = glewInit();
     if (glew_status != GLEW_OK) {
