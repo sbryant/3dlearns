@@ -158,6 +158,9 @@ int main(int argc, char** argv) {
     }
 
     free(v);
+    SDL_GL_DeleteContext(opengl3_context);
+    SDL_DestroyWindow(screen);
+    SDL_Quit();
 
     return 0;
 }
