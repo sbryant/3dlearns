@@ -4,8 +4,19 @@
 
 #include "vector.h"
 
-int main(int argc, char** argv) {
+float approach(float goal, float current, float dt) {
+    float diff = goal - current;
 
+    if (diff > dt)
+        return current + dt;
+
+    if (diff < -dt)
+        return current - dt;
+
+    return goal;
+}
+
+int main(int argc, char** argv) {
     /* Setup OpenGL 3.2 Context For OS X */
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
