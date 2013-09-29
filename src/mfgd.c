@@ -34,6 +34,9 @@ int main(int argc, char** argv) {
     /* initialize a render context, managed by SDL */
     SDL_GLContext *opengl3_context = SDL_GL_CreateContext(screen);
 
+
+    /* Use GLEW to setup gl Functions */
+	glewExperimental = GL_TRUE; /* Turn on everything */
     GLenum glew_status = glewInit();
     if (glew_status != GLEW_OK) {
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
