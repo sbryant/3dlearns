@@ -30,10 +30,8 @@ int main(int argc, char** argv) {
                                           0, 0,
                                           SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL);
 
-
     /* initialize a render context, managed by SDL */
     SDL_GLContext *opengl3_context = SDL_GL_CreateContext(screen);
-
 
     /* Use GLEW to setup gl Functions */
 	glewExperimental = GL_TRUE; /* Turn on everything */
