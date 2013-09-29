@@ -5,7 +5,6 @@
 #include "vector.h"
 
 int main(int argc, char** argv) {
-    SDL_Init(SDL_INIT_VIDEO);
 
     /* Setup OpenGL 3.2 Context For OS X */
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
