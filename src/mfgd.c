@@ -73,14 +73,17 @@ vector *vector_normalize(vector* const v) {
 
 int main(int argc, char** argv) {
 
-    vector v = { 3.0, 4.0 };
-    printf("Initial speed: %.2f\n", vector_length(&v));
+    point i = { 3.0, 4.0 };
+    point p = { 1.0, 2.0 };
 
-    vector *d = vector_mul_scalar(&v, 2.0);
-    printf("Doubled speed: %.2f\n", vector_length(d));
+    vector *v = point_sub(&p, &i);
+    vector *v_norm = vector_normalize(v);
 
-    vector *h = vector_div_scalar(&v, 2.0);
-    printf("Halved speed: %.2f\n", vector_length(h));
+    printf("View vector: (%.2f, %.2f)\n", v_norm->x, v_norm->y);
+    printf("View vector length: (%.2f)\n", vector_length(v_norm));
+
+    free(v);
+    free(v_norm);
 
     return 0;
 }
