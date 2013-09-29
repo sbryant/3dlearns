@@ -91,17 +91,14 @@ vector *vector_normalize(vector* const v) {
 
 int main(int argc, char** argv) {
 
-    point i = { 3.0, 4.0 };
-    point p = { 1.0, 2.0 };
+    vector r = { 4.0, 0.0 };
+    vector d = { 0.0, -5.0 };
 
-    vector *v = point_sub(&i, &p);
-    vector *v_norm = vector_normalize(v);
+    vector *v = vector_add(&d, &r);
 
-    printf("View vector: (%.2f, %.2f)\n", v_norm->x, v_norm->y);
-    printf("View vector length: (%.2f)\n", vector_length(v_norm));
+    printf("vector: (%.2f, %.2f)\n", v->x, v->y);
 
     free(v);
-    free(v_norm);
 
     return 0;
 }
