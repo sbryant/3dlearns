@@ -60,6 +60,17 @@ vector *vector_div_scalar(vector* const v, float const s) {
     return v2;
 }
 
+
+vector *vector_normalize(vector* const v) {
+    vector *v2  = (vector *)calloc(1, sizeof(vector));
+    float v_len = vector_length(v);
+
+    v2->x = v->x / v_len;
+    v2->y = v->y / v_len;
+
+    return v2;
+}
+
 int main(int argc, char** argv) {
 
     vector v = { 3.0, 4.0 };
