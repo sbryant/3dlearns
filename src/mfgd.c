@@ -60,9 +60,9 @@ int main(int argc, char** argv) {
     glBindVertexArray( vao );
 
     float verts[] = {
-        0.0f, 0.5f,
-        0.5f, -0.5f,
-        -0.5f, -0.5f
+        0.0f, 0.5f, 1.0, 0.0, 0.0,
+        0.5f, -0.5f, 0.0, 1.0, 0.0,
+        -0.5f, -0.5f, 0.0, 0.0, 1.0
     };
 
     glBindBuffer( GL_ARRAY_BUFFER, vbo );
@@ -106,8 +106,11 @@ int main(int argc, char** argv) {
 
     GLint pos_attr = glGetAttribLocation( shader_prog, "position" );
     glEnableVertexAttribArray(pos_attr);
-    glVertexAttribPointer( pos_attr, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+    glVertexAttribPointer( pos_attr, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), 0 );
 
+    GLint color_attr = glGetAttribLocation( shader_prog, "color" );
+    glEnableVertexAttribArray(color_attr);
+    glVertexAttribPointer( color_attr, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(2 * sizeof(float)));
 
     /* get handle to hold verts we upload */
     while(true) {
