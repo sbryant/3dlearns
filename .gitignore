@@ -1,3 +1,8 @@
 /src/mfgd
 mfgd
 *.o
+/test/.clarcache
+/test/clar.suite
+/test/clar_test
+/test/clar_test.dSYM/Contents/Info.plist
+/test/clar_test.dSYM/Contents/Resources/DWARF/clar_test
