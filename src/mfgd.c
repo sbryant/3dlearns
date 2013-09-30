@@ -4,6 +4,8 @@
 
 #include "matrix.h"
 #include "vector.h"
+#include "utils.h"
+#include "assert.h"
 
 float approach(float goal, float current, float dt) {
     float diff = goal - current;
@@ -45,18 +47,74 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    /* Bail if we don't support OpenGL 3.2 */
-    if (!GLEW_VERSION_3_2) {
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-                                 "OpenGL Error",
-                                 "OpenGL 3.2 is required.",
-                                 NULL);
-        return -1;
-    }
+	printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+
+    GLuint vao;
+    glGenVertexArrays( 1, &vao );
+    glBindVertexArray( vao );
+
+    float verts[] = {
+        0.0f, 0.5f,
+        0.5f, -0.5f,
+        -0.5f, -0.5f
+    };
+
+    glBindBuffer( GL_ARRAY_BUFFER, vbo );
+    glBufferData( GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+
+    const GLubyte* vendor   = glGetString (GL_VENDOR);
+    const GLubyte* renderer = glGetString (GL_RENDERER);
+    const GLubyte* version  = glGetString (GL_VERSION);
+    const GLubyte* glsl_ver = glGetString (GL_SHADING_LANGUAGE_VERSION);
+
+    printf ( "%s : %s (%s)\n >> GLSL: %s\n",
+             vendor,
+             renderer,
+             version,
+             glsl_ver );
+
+    GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
+    char* vert_source = read_shader("shaders/simple_vert.glsl");
+    assert(vert_source != NULL);
+
+    glShaderSource(vert_shader, 1, (const GLchar**)&vert_source, NULL);
+
+    glCompileShader(vert_shader);
+
+    GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    GLchar* frag_source = (GLchar*)read_shader("shaders/simple_frag.glsl");
+    assert(frag_source != NULL);
+
+    glShaderSource(frag_shader, 1, (const GLchar**)&frag_source, NULL);
+    glCompileShader(frag_shader);
+
+    GLuint shader_prog = glCreateProgram();
+    glAttachShader(shader_prog, vert_shader);
+    glAttachShader(shader_prog, frag_shader);
+
+    glUseProgram( shader_prog );
+
+    glBindFragDataLocation( shader_prog, 0, "outColor" );
+
+    glLinkProgram( shader_prog );
+
+    GLint pos_attr = glGetAttribLocation( shader_prog, "position" );
+    glEnableVertexAttribArray(pos_attr);
+    glVertexAttribPointer( pos_attr, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+
+
+    /* get handle to hold verts we upload */
     while(true) {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);
+
+        glUseProgram( shader_prog );
+
+        glDrawArrays( GL_TRIANGLES, 0, 3 );
+
         SDL_GL_SwapWindow(screen);
 
         SDL_Event event;
@@ -80,6 +138,13 @@ int main(int argc, char** argv) {
         if (quit == 1) // if received instruction to quit
             break;
     }
+
+    glDeleteProgram(shader_prog);
+    glDeleteShader(frag_shader);
+    glDeleteShader(vert_shader);
+
+    glDeleteBuffers(1, &vbo);
+    glDeleteVertexArrays(1, &vao);
 
     SDL_GL_DeleteContext(opengl3_context);
     SDL_DestroyWindow(screen);
