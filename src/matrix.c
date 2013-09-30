@@ -18,6 +18,34 @@ vec4x1 *mat4x4_mul_vec4x1(mat4x4* const m, vec4x1* const v) {
     return v2;
 }
 
+mat4x4 *mat4x4_mul(mat4x4* const m, mat4x4* const m2) {
+    mat4x4 *r = (mat4x4*)calloc(1, sizeof(mat4x4));
+
+    for(int i = 0; i < 4; i++) {
+        r->x[i] = mp_at(m,x,i) * mp_at(m2, x, 0) + \
+            mp_at(m, y, i) * mp_at(m2, x, 1) +         \
+            mp_at(m, z, i) * mp_at(m2, x, 2) +         \
+            mp_at(m, w, i) * mp_at(m2, x, 3);
+
+        r->y[i] = mp_at(m,x,i) * mp_at(m2, y, 0) + \
+            mp_at(m, y, i) * mp_at(m2, y, 1) +         \
+            mp_at(m, z, i) * mp_at(m2, y, 2) +         \
+            mp_at(m, w, i) * mp_at(m2, y, 3);
+
+        r->z[i] = mp_at(m,x,i) * mp_at(m2, z, 0) + \
+            mp_at(m, y, i) * mp_at(m2, z, 1) +         \
+            mp_at(m, z, i) * mp_at(m2, z, 2) +         \
+            mp_at(m, w, i) * mp_at(m2, z, 3);
+
+        r->w[i] = mp_at(m,x,i) * mp_at(m2, w, 0) + \
+            mp_at(m, y, i) * mp_at(m2, w, 1) +         \
+            mp_at(m, z, i) * mp_at(m2, w, 2) +         \
+            mp_at(m, w, i) * mp_at(m2, w, 3);
+    }
+
+    return r;
+}
+
 mat4x4* mat4x4_make_ident(mat4x4* m) {
     mat4x4* r = m;
     int zero = 1;
