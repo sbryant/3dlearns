@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <SDL.h>
 
+#include "matrix.h"
 #include "vector.h"
 
 float approach(float goal, float current, float dt) {
