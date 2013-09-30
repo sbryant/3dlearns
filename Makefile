@@ -24,10 +24,14 @@ endif
 .DEFAULT_GOAL = all
 all: $(TARGET)
 
+test:
+	@make -C test clean test
+
 clean:
+	make -C test clean
 	rm -rf $(OBJS) $(TARGET) $(TARGET).o $(TARGET).new
 
-.PHONY: all clean
+.PHONY: all clean test
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@.new
