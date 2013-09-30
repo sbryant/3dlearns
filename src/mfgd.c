@@ -20,11 +20,13 @@ float approach(float goal, float current, float dt) {
 }
 
 int main(int argc, char** argv) {
+    SDL_Init(SDL_INIT_VIDEO);
+
     /* Setup OpenGL 3.2 Context For OS X */
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
 
     /* Create a fullscreen window */
     SDL_Window *screen = SDL_CreateWindow("MFGD",
@@ -37,8 +39,9 @@ int main(int argc, char** argv) {
     SDL_GLContext *opengl3_context = SDL_GL_CreateContext(screen);
 
     /* Use GLEW to setup gl Functions */
-	glewExperimental = GL_TRUE; /* Turn on everything */
+    glewExperimental = GL_TRUE;
     GLenum glew_status = glewInit();
+
     if (glew_status != GLEW_OK) {
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
                                  "GLEW Error",
