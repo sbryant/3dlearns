@@ -2,79 +2,85 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdio.h>
 
-
-point* point_add_vector(point* const p, vector* const v) {
-    point *p2 = (point*)calloc(1, sizeof(point));
-
-    p2->x = p->x + v->x;
-    p2->y = p->y + v->y;
-
-    return p2;
+float vec4x1_length(vec4x1* const v) {
+    return sqrtf((v->x * v->x) +
+                 (v->y * v->y) +
+                 (v->z * v->z) +
+                 (v->w * v->w));
 }
 
-vector* point_sub(point* const a, point* const b) {
-    vector* v = (vector*)calloc(1, sizeof(vector));
-    v->x = a->x - b->x;
-    v->y = a->y - b->y;
-
-    return v;
+float vec4x1_length_square(vec4x1* const v) {
+    return (v->x * v->x) +
+        (v->y * v->y) +
+        (v->z * v->z) +
+        (v->w * v->w);
 }
 
-
-float vector_length(vector* const v) {
-    return sqrtf((v->x * v->x) + (v->y * v->y));
-}
-
-float vector_length_square(vector* const v) {
-    return (v->x * v->x) + (v->y * v->y);
-}
-
-vector* vector_add(vector* const v1, vector* const v2) {
-    vector *vr = (vector*)calloc(1, sizeof(vector));
+vec4x1* vec4x1_add(vec4x1* const v1, vec4x1* const v2) {
+    vec4x1 *vr = (vec4x1*)calloc(1, sizeof(vec4x1));
 
     vr->x = v1->x + v2->x;
     vr->y = v1->y + v2->y;
+    vr->z = v1->z + v2->z;
+    vr->w = v1->w + v2->w;
 
     return vr;
 }
 
-vector* vector_sub(vector* const v1, vector* const v2) {
-    vector *vr = (vector*)calloc(1, sizeof(vector));
+vec4x1* vec4x1_sub(vec4x1* const v1, vec4x1* const v2) {
+    vec4x1 *vr = (vec4x1*)calloc(1, sizeof(vec4x1));
 
     vr->x = v1->x - v2->x;
     vr->y = v1->y - v2->y;
+    vr->z = v1->z - v2->z;
+    vr->w = v1->w - v2->w;
 
     return vr;
 }
 
-/* Vector scaling functions */
+/* Vec4x1 scaling functions */
 
-vector *vector_mul_scalar(vector* const v, float const s) {
-    vector* v2 = (vector *)calloc(1, sizeof(vector));
+vec4x1 *vec4x1_mul_scalar(vec4x1* const v, float const s) {
+    vec4x1* v2 = (vec4x1 *)calloc(1, sizeof(vec4x1));
 
     v2->x = v->x * s;
-    v2->y = v->y * s ;
+    v2->y = v->y * s;
+    v2->z = v->z * s;
+    v2->w = v->w * s;
 
     return v2;
 }
 
-vector *vector_div_scalar(vector* const v, float const s) {
-    vector* v2 = (vector *)calloc(1, sizeof(vector));
+vec4x1 *vec4x1_div_scalar(vec4x1* const v, float const s) {
+    vec4x1* v2 = (vec4x1 *)calloc(1, sizeof(vec4x1));
 
     v2->x = v->x / s;
     v2->y = v->y / s ;
+    v2->z = v->z / s;
+    v2->w = v->w / s;
 
     return v2;
 }
 
 
-vector *vector_normalize(vector* const v) {
-    vector *v2  = (vector *)calloc(1, sizeof(vector));
-    float v_len = vector_length(v);
+vec4x1 *vec4x1_normalize(vec4x1* const v) {
+    vec4x1 *v2  = (vec4x1 *)calloc(1, sizeof(vec4x1));
+    float v_len = vec4x1_length(v);
 
     v2->x = v->x / v_len;
     v2->y = v->y / v_len;
+    v2->z = v->z / v_len;
+    v2->w = v->w / v_len;
 
     return v2;
+}
+
+void vec4x1_print(vec4x1* const v) {
+    printf("x:%.2f y:%.2f z%.2f w%.2f\n",
+           v->x,
+           v->y,
+           v->z,
+           v->w);
 }

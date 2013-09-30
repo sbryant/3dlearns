@@ -1,25 +1,20 @@
 #pragma once
-typedef struct s_vector {
+typedef struct s_vec4x1 {
     float x;
     float y;
-} vector;
+    float z;
+    float w;
+} vec4x1;
 
-typedef struct s_point {
-    float x;
-    float y;
-} point;
+float vec4x1_length(vec4x1* const v);
+float vec4x1_length_square(vec4x1* const v);
 
+vec4x1* vec4x1_add(vec4x1* const v1, vec4x1* const v2);
+vec4x1* vec4x1_sub(vec4x1* const v1, vec4x1* const v2);
 
-point* point_add_vector(point* const p, vector* const v);
-vector* point_sub(point* const a, point* const b);
+vec4x1 *vec4x1_mul_scalar(vec4x1* const v, float const s);
+vec4x1 *vec4x1_div_scalar(vec4x1* const v, float const s);
 
-float vector_length(vector* const v);
-float vector_length_square(vector* const v);
+vec4x1 *vec4x1_normalize(vec4x1* const v);
 
-vector* vector_add(vector* const v1, vector* const v2);
-vector* vector_sub(vector* const v1, vector* const v2);
-
-vector *vector_mul_scalar(vector* const v, float const s);
-vector *vector_div_scalar(vector* const v, float const s);
-
-vector *vector_normalize(vector* const v);
+void vec4x1_print(vec4x1* const v);
