@@ -103,11 +103,30 @@ mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec4x1* up) {
     float c = cosf(a);
     float s = sinf(a);
 
-    r.x[0] = c;
-    r.x[1] = s;
+    if (up->x) {
+        r.y[1] = c;
+        r.y[2] = s;
 
-    r.y[0] = -s;
-    r.y[1] = c;
+        r.z[1] = -s;
+        r.z[2] = c;
+    }
+
+    if (up->y) {
+        r.x[0] = c;
+        r.x[2] = -s;
+
+        r.z[0] = s;
+        r.z[2] = c;
+    }
+
+
+    if (up->z) {
+        r.x[0] = c;
+        r.x[1] = s;
+
+        r.y[0] = -s;
+        r.y[1] = c;
+    }
 
     mat4x4 *res = mat4x4_mul(&r, m);
 
