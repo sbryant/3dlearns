@@ -97,9 +97,8 @@ void mat4x4_print(mat4x4* m) {
 mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec4x1* up) {
     mat4x4 r; mat4x4_init(&r); mat4x4_make_ident(&r);
 
-    float a = angle * (PI/180.0);
-    float c = cosf(a);
-    float s = sinf(a);
+    float c = cosf(angle);
+    float s = sinf(angle);
 
     if (up->x) {
         r.y[1] = c;
