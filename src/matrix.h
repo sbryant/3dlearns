@@ -24,5 +24,6 @@ mat4x4* mat4x4_mul(mat4x4* const m, mat4x4* const m2);
 
 mat4x4* mat4x4_init(mat4x4* r);
 mat4x4* mat4x4_make_ident(mat4x4* m);
+float* mat4x4_make_array(mat4x4* const m);
 
 void mat4x4_print(mat4x4* m);

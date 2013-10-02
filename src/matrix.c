@@ -74,6 +74,16 @@ mat4x4* mat4x4_make_ident(mat4x4* m) {
     return r;
 }
 
+float* mat4x4_make_array(mat4x4* const m) {
+    float *r = (float*)calloc(16, sizeof(float));
+
+    memcpy((void*)r, (void*)(m->x), sizeof(float) * 4);
+    memcpy((void*)(r+4), (void*)(m->y), sizeof(float) * 4);
+    memcpy((void*)(r+8), (void*)(m->z), sizeof(float) * 4);
+    memcpy((void*)(r+12), (void*)(m->w), sizeof(float) * 4);
+    return r;
+}
+
 void mat4x4_print(mat4x4* m) {
     for(int i = 0; i < 4; i++) {
         printf("x[%d]:%.2f y[%d]:%.2f z[%d]%.2f w[%d]%.2f\n",
