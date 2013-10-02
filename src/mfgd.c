@@ -52,22 +52,6 @@ int main(int argc, char** argv) {
 
 	printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-
-    GLuint vao;
-    glGenVertexArrays( 1, &vao );
-    glBindVertexArray( vao );
-
-    float verts[] = {
-        0.0f, 0.5f, 1.0, 0.0, 0.0,
-        0.5f, -0.5f, 0.0, 1.0, 0.0,
-        -0.5f, -0.5f, 0.0, 0.0, 1.0
-    };
-
-    glBindBuffer( GL_ARRAY_BUFFER, vbo );
-    glBufferData( GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-
     const GLubyte* vendor   = glGetString (GL_VENDOR);
     const GLubyte* renderer = glGetString (GL_RENDERER);
     const GLubyte* version  = glGetString (GL_VERSION);
@@ -78,6 +62,35 @@ int main(int argc, char** argv) {
              renderer,
              version,
              glsl_ver );
+
+
+    GLuint vao;
+    glGenVertexArrays( 1, &vao );
+    glBindVertexArray( vao );
+
+    float verts[] = {
+        -0.5f,  0.5f, 1.0, 0.0, 0.0,
+         0.5f,  0.5f, 0.0, 1.0, 0.0,
+         0.5f, -0.5f, 0.0, 0.0, 1.0,
+        -0.5f, -0.5f, 1.0, 1.0, 0.0
+    };
+
+    GLuint elements[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+
+    GLuint ebo;
+    glGenBuffers(1, &ebo);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
+
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo );
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
 
     GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
     char* vert_source = read_shader("shaders/simple_vert.glsl");
@@ -119,7 +132,7 @@ int main(int argc, char** argv) {
 
         glUseProgram( shader_prog );
 
-        glDrawArrays( GL_TRIANGLES, 0, 3 );
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         SDL_GL_SwapWindow(screen);
 
