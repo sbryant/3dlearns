@@ -4,6 +4,7 @@
 #include <string.h>
 #include "matrix.h"
 
+#define PI 3.141592653589793
 
 #define mp_at(m,v,i) m->v[i]
 
