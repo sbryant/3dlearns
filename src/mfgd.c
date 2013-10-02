@@ -125,6 +125,10 @@ int main(int argc, char** argv) {
     glEnableVertexAttribArray(color_attr);
     glVertexAttribPointer( color_attr, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(2 * sizeof(float)));
 
+    GLuint transform_uni = glGetUniformLocation(shader_prog, "trans");
+    mat4x4 *trans = mat4x4_make_ident(NULL);
+    float *data =  mat4x4_make_array(trans);
+
     /* get handle to hold verts we upload */
     while(true) {
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -132,6 +136,7 @@ int main(int argc, char** argv) {
 
         glUseProgram( shader_prog );
 
+        glUniformMatrix4fv(transform_uni, 1, GL_FALSE, data);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         SDL_GL_SwapWindow(screen);
@@ -157,6 +162,8 @@ int main(int argc, char** argv) {
         if (quit == 1) // if received instruction to quit
             break;
     }
+
+    free(trans);
 
     glDeleteProgram(shader_prog);
     glDeleteShader(frag_shader);
