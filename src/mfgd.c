@@ -126,7 +126,9 @@ int main(int argc, char** argv) {
     glVertexAttribPointer( color_attr, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(2 * sizeof(float)));
 
     GLuint transform_uni = glGetUniformLocation(shader_prog, "trans");
-    mat4x4 *trans = mat4x4_make_ident(NULL);
+    mat4x4 *ident = mat4x4_make_ident(NULL);
+    vec4x1 up = { 0.0, 0.0, 1.0 };
+    mat4x4 *trans = mat4x4_rotate(ident, 180.0, &up);
     float *data =  mat4x4_make_array(trans);
 
     /* get handle to hold verts we upload */
