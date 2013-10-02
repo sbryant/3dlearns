@@ -18,7 +18,7 @@ vec4x1 *mat4x4_mul_vec4x1(mat4x4* const m, vec4x1* const v) {
 }
 
 mat4x4 *mat4x4_mul(mat4x4* const m, mat4x4* const m2) {
-    mat4x4 *r = mat4x4_init(NULL);
+    mat4x4 *r = mat4x4_make_ident(NULL);
 
     for(int i = 0; i < 4; i++) {
         r->x[i] = mp_at(m,x,i) * mp_at(m2, x, 0) + \
