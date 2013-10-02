@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
 
     GLuint transform_uni = glGetUniformLocation(shader_prog, "trans");
     mat4x4 *ident = mat4x4_make_ident(NULL);
-    vec4x1 up = { 0.0, 0.0, 1.0 };
+    vec4 up = { 0.0, 0.0, 1.0 };
 
     unsigned long tick = SDL_GetPerformanceFrequency();
     /* get handle to hold verts we upload */

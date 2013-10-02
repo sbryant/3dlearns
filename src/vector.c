@@ -4,22 +4,22 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-float vec4x1_length(vec4x1* const v) {
+float vec4_length(vec4* const v) {
     return sqrtf((v->x * v->x) +
                  (v->y * v->y) +
                  (v->z * v->z) +
                  (v->w * v->w));
 }
 
-float vec4x1_length_square(vec4x1* const v) {
+float vec4_length_square(vec4* const v) {
     return (v->x * v->x) +
         (v->y * v->y) +
         (v->z * v->z) +
         (v->w * v->w);
 }
 
-vec4x1* vec4x1_add(vec4x1* const v1, vec4x1* const v2) {
-    vec4x1 *vr = (vec4x1*)calloc(1, sizeof(vec4x1));
+vec4* vec4_add(vec4* const v1, vec4* const v2) {
+    vec4 *vr = (vec4*)calloc(1, sizeof(vec4));
 
     vr->x = v1->x + v2->x;
     vr->y = v1->y + v2->y;
@@ -29,8 +29,8 @@ vec4x1* vec4x1_add(vec4x1* const v1, vec4x1* const v2) {
     return vr;
 }
 
-vec4x1* vec4x1_sub(vec4x1* const v1, vec4x1* const v2) {
-    vec4x1 *vr = (vec4x1*)calloc(1, sizeof(vec4x1));
+vec4* vec4_sub(vec4* const v1, vec4* const v2) {
+    vec4 *vr = (vec4*)calloc(1, sizeof(vec4));
 
     vr->x = v1->x - v2->x;
     vr->y = v1->y - v2->y;
@@ -40,10 +40,10 @@ vec4x1* vec4x1_sub(vec4x1* const v1, vec4x1* const v2) {
     return vr;
 }
 
-/* Vec4x1 scaling functions */
+/* Vec4 scaling functions */
 
-vec4x1 *vec4x1_mul_scalar(vec4x1* const v, float const s) {
-    vec4x1* v2 = (vec4x1 *)calloc(1, sizeof(vec4x1));
+vec4 *vec4_mul_scalar(vec4* const v, float const s) {
+    vec4* v2 = (vec4 *)calloc(1, sizeof(vec4));
 
     v2->x = v->x * s;
     v2->y = v->y * s;
@@ -53,8 +53,8 @@ vec4x1 *vec4x1_mul_scalar(vec4x1* const v, float const s) {
     return v2;
 }
 
-vec4x1 *vec4x1_div_scalar(vec4x1* const v, float const s) {
-    vec4x1* v2 = (vec4x1 *)calloc(1, sizeof(vec4x1));
+vec4 *vec4_div_scalar(vec4* const v, float const s) {
+    vec4* v2 = (vec4 *)calloc(1, sizeof(vec4));
 
     v2->x = v->x / s;
     v2->y = v->y / s ;
@@ -65,9 +65,9 @@ vec4x1 *vec4x1_div_scalar(vec4x1* const v, float const s) {
 }
 
 
-vec4x1 *vec4x1_normalize(vec4x1* const v) {
-    vec4x1 *v2  = (vec4x1 *)calloc(1, sizeof(vec4x1));
-    float v_len = vec4x1_length(v);
+vec4 *vec4_normalize(vec4* const v) {
+    vec4 *v2  = (vec4 *)calloc(1, sizeof(vec4));
+    float v_len = vec4_length(v);
 
     v2->x = v->x / v_len;
     v2->y = v->y / v_len;
@@ -77,7 +77,7 @@ vec4x1 *vec4x1_normalize(vec4x1* const v) {
     return v2;
 }
 
-void vec4x1_print(vec4x1* const v) {
+void vec4_print(vec4* const v) {
     printf("x:%.2f y:%.2f z%.2f w%.2f\n",
            v->x,
            v->y,

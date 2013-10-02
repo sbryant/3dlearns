@@ -6,8 +6,8 @@
 
 #define mp_at(m,v,i) m->v[i]
 
-vec4x1 *mat4x4_mul_vec4x1(mat4x4* const m, vec4x1* const v) {
-    vec4x1 *v2 = (vec4x1*)calloc(1, sizeof(vec4x1));
+vec4 *mat4x4_mul_vec4(mat4x4* const m, vec4* const v) {
+    vec4 *v2 = (vec4*)calloc(1, sizeof(vec4));
 
     v2->x = (mp_at(m,x,0) * v->x) + (mp_at(m,y,0) * v->y) + (mp_at(m,z,0) * v->z) + (mp_at(m,w,0) * v->w);
     v2->y = (mp_at(m,x,1) * v->x) + (mp_at(m,y,1) * v->y) + (mp_at(m,z,1) * v->z) + (mp_at(m,w,1) * v->w);
@@ -94,7 +94,7 @@ void mat4x4_print(mat4x4* m) {
 }
 
 
-mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec4x1* up) {
+mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec4* up) {
     mat4x4 r; mat4x4_init(&r); mat4x4_make_ident(&r);
 
     float c = cosf(angle);
