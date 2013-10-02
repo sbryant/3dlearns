@@ -1,6 +1,9 @@
 #pragma once
 #include "vector.h"
 
+#ifndef PI
+#define PI 3.141592653589793
+#endif
 
 /* Column Major */
 typedef struct s_mat4x4 {

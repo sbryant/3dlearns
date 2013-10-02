@@ -4,8 +4,6 @@
 #include <string.h>
 #include "matrix.h"
 
-#define PI 3.141592653589793
-
 #define mp_at(m,v,i) m->v[i]
 
 vec4x1 *mat4x4_mul_vec4x1(mat4x4* const m, vec4x1* const v) {
