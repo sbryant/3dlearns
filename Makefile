@@ -12,7 +12,7 @@ CPPFLAGS = $(OPTCPPFLAGS)
 SDL_LIBS = $(call pkg-config,libs,SDL2_image) $(call pkg-configs,libs,sdl2)
 SDL_CFLAGS = $(call pkg-config,cflags,SDL2_image) $(call pkg-configs,cflags,sdl2)
 LIBS = $(call pkg-config,libs,glew) $(SDL_LIBS) $(OPTLIBS)
-CFLAGS = -g -std=c99 $(call pkg-config,cflags,glew) $(SDL_CFLAGS) $(INCLUDE) -Wall -Werror $(OPTFLAGS) -O3
+CFLAGS = -g -std=c99 $(call pkg-config,cflags,glew) $(SDL_CFLAGS) $(INCLUDE) -Wall -Werror $(OPTFLAGS)
 
 ifeq ($(shell uname),Darwin)
 # OS X specific libs required by glfw3
