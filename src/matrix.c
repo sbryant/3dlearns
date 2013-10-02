@@ -94,3 +94,22 @@ void mat4x4_print(mat4x4* m) {
                i, m->w[i]);
     }
 }
+
+
+mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec4x1* up) {
+    mat4x4 r; mat4x4_init(&r); mat4x4_make_ident(&r);
+
+    float a = angle * (PI/180.0);
+    float c = cosf(a);
+    float s = sinf(a);
+
+    r.x[0] = c;
+    r.x[1] = s;
+
+    r.y[0] = -s;
+    r.y[1] = c;
+
+    mat4x4 *res = mat4x4_mul(&r, m);
+
+    return res;
+}

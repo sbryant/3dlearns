@@ -94,3 +94,17 @@ void test_matrix__matrix_mul(void) {
     free(r2);
     free(r3);
 }
+
+void test_matrix__rotate(void) {
+    mat4x4 *trans = mat4x4_make_ident(NULL);
+    vec4x1 v = { 1.0, 0.0, 0.0, 1.0 };
+
+    /* rotate around Z */
+    mat4x4 *r = mat4x4_rotate(trans, 180.0, NULL);
+
+    vec4x1 *v2 = mat4x4_mul_vec4x1(r, &v);
+
+    printf("X is %f\n", v2->x);
+    cl_assert_(v2->x == -1.0, "X didn't flip");
+
+}
