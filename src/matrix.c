@@ -19,7 +19,7 @@ vec4x1 *mat4x4_mul_vec4x1(mat4x4* const m, vec4x1* const v) {
 }
 
 mat4x4 *mat4x4_mul(mat4x4* const m, mat4x4* const m2) {
-    mat4x4 *r = (mat4x4*)calloc(1, sizeof(mat4x4));
+    mat4x4 *r = mat4x4_init(NULL);
 
     for(int i = 0; i < 4; i++) {
         r->x[i] = mp_at(m,x,i) * mp_at(m2, x, 0) + \
@@ -46,17 +46,25 @@ mat4x4 *mat4x4_mul(mat4x4* const m, mat4x4* const m2) {
     return r;
 }
 
-mat4x4* mat4x4_make_ident(mat4x4* m) {
-    mat4x4* r = m;
-    int zero = 1;
-
-    if (!r) {
+mat4x4* mat4x4_init(mat4x4* r) {
+    if (!r)
         r = (mat4x4*)calloc(1, sizeof(mat4x4));
-        zero = 0;
-    }
 
-    if (zero)
-        memset((void*)r, 0, sizeof(mat4x4));
+    r->x = (float*)calloc(4, sizeof(float));
+    r->y = (float*)calloc(4, sizeof(float));
+    r->z = (float*)calloc(4, sizeof(float));
+    r->w = (float*)calloc(4, sizeof(float));
+
+    return r;
+}
+
+mat4x4* mat4x4_make_ident(mat4x4* m) {
+    mat4x4* r = !m ? mat4x4_init(NULL) : m;
+
+    memset((void*)(r->x), 0, sizeof(float) * 4);
+    memset((void*)(r->y), 0, sizeof(float) * 4);
+    memset((void*)(r->z), 0, sizeof(float) * 4);
+    memset((void*)(r->w), 0, sizeof(float) * 4);
 
     r->x[0] = 1.0;
     r->y[1] = 1.0;
