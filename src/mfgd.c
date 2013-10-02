@@ -128,15 +128,20 @@ int main(int argc, char** argv) {
     GLuint transform_uni = glGetUniformLocation(shader_prog, "trans");
     mat4x4 *ident = mat4x4_make_ident(NULL);
     vec4x1 up = { 0.0, 0.0, 1.0 };
-    mat4x4 *trans = mat4x4_rotate(ident, 180.0, &up);
-    float *data =  mat4x4_make_array(trans);
 
+    unsigned long tick = SDL_GetPerformanceFrequency();
     /* get handle to hold verts we upload */
     while(true) {
 		glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);
 
         glUseProgram( shader_prog );
+
+        unsigned long  t = SDL_GetPerformanceCounter();
+        float rot = (float)t / tick;
+        float a =  180 * (PI/180.0);
+        mat4x4 *trans = mat4x4_rotate(ident, rot * a, &up);
+        float *data =  mat4x4_make_array(trans);
 
         glUniformMatrix4fv(transform_uni, 1, GL_FALSE, data);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -145,6 +150,8 @@ int main(int argc, char** argv) {
 
         SDL_Event event;
         int quit = 0;
+        free(trans);
+        free(data);
 
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -165,7 +172,7 @@ int main(int argc, char** argv) {
             break;
     }
 
-    free(trans);
+    free(ident);
 
     glDeleteProgram(shader_prog);
     glDeleteShader(frag_shader);
