@@ -235,7 +235,7 @@ int main(int argc, char** argv) {
     mat4x4_cleanup(proj);
 
     uint64_t old = SDL_GetPerformanceCounter();
-     unsigned long tick = SDL_GetPerformanceFrequency();
+    unsigned long tick = SDL_GetPerformanceFrequency();
     int pause = 0;
 
     uint64_t now = SDL_GetPerformanceCounter();
