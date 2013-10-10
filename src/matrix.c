@@ -17,6 +17,20 @@ vec4 *mat4x4_mul_vec4(mat4x4* const m, vec4* const v) {
     return v2;
 }
 
+
+mat4x4 *mat4x4_translate(mat4x4* m, float x, float y, float z) {
+    mat4x4* r = mat4x4_make_ident(NULL);
+    r->w[0] = x;
+    r->w[1] = y;
+    r->w[2] = z;
+
+    mat4x4* res = mat4x4_mul(r, m);
+
+    mat4x4_cleanup(r);
+
+    return res;
+}
+
 mat4x4 *mat4x4_mul(mat4x4* const m, mat4x4* const m2) {
     mat4x4 *r = mat4x4_make_ident(NULL);
 

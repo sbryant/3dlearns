@@ -24,3 +24,4 @@ float* mat4x4_make_array(mat4x4* const m);
 void mat4x4_print(mat4x4* m);
 
 mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec3* up);
+mat4x4 *mat4x4_translate(mat4x4* m, float x, float y, float z);
