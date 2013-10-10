@@ -17,6 +17,7 @@ vec4* mat4x4_mul_vec4(mat4x4* const m, vec4* const v);
 mat4x4* mat4x4_mul(mat4x4* const m, mat4x4* const m2);
 
 mat4x4* mat4x4_init(mat4x4* r);
+void mat4x4_cleanup(mat4x4* m);
 mat4x4* mat4x4_make_ident(mat4x4* m);
 float* mat4x4_make_array(mat4x4* const m);
 

@@ -129,3 +129,12 @@ mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec3* axis) {
 
     return res;
 }
+
+
+void mat4x4_cleanup(mat4x4* m) {
+    free(m->x);
+    free(m->y);
+    free(m->z);
+    free(m->w);
+    free(m);
+}
