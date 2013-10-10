@@ -94,13 +94,13 @@ void mat4x4_print(mat4x4* m) {
 }
 
 
-mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec4* up) {
+mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec3* axis) {
     mat4x4 r; mat4x4_init(&r); mat4x4_make_ident(&r);
 
     float c = cosf(angle);
     float s = sinf(angle);
 
-    if (up->x) {
+    if (axis->x) {
         r.y[1] = c;
         r.y[2] = s;
 
@@ -108,7 +108,7 @@ mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec4* up) {
         r.z[2] = c;
     }
 
-    if (up->y) {
+    if (axis->y) {
         r.x[0] = c;
         r.x[2] = -s;
 
@@ -117,7 +117,7 @@ mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec4* up) {
     }
 
 
-    if (up->z) {
+    if (axis->z) {
         r.x[0] = c;
         r.x[1] = s;
 
