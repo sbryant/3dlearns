@@ -25,7 +25,7 @@ float vec4_length_square(vec4* const v) {
 }
 
 vec4* vec4_add(vec4* const v1, vec4* const v2) {
-    vec4 *vr = (vec4*)calloc(1, sizeof(vec4));
+    vec4 *vr = vec4_make();
 
     vr->x = v1->x + v2->x;
     vr->y = v1->y + v2->y;
@@ -36,7 +36,7 @@ vec4* vec4_add(vec4* const v1, vec4* const v2) {
 }
 
 vec4* vec4_sub(vec4* const v1, vec4* const v2) {
-    vec4 *vr = (vec4*)calloc(1, sizeof(vec4));
+    vec4 *vr = vec4_make();
 
     vr->x = v1->x - v2->x;
     vr->y = v1->y - v2->y;
@@ -59,7 +59,7 @@ vec3* vec3_sub(vec3* const v1, vec3* const v2) {
 /* Vec4 scaling functions */
 
 vec4 *vec4_mul_scalar(vec4* const v, float const s) {
-    vec4* v2 = (vec4 *)calloc(1, sizeof(vec4));
+    vec4* v2 = vec4_make();
 
     v2->x = v->x * s;
     v2->y = v->y * s;
@@ -70,7 +70,7 @@ vec4 *vec4_mul_scalar(vec4* const v, float const s) {
 }
 
 vec4 *vec4_div_scalar(vec4* const v, float const s) {
-    vec4* v2 = (vec4 *)calloc(1, sizeof(vec4));
+    vec4* v2 = vec4_make();
 
     v2->x = v->x / s;
     v2->y = v->y / s ;
@@ -78,6 +78,10 @@ vec4 *vec4_div_scalar(vec4* const v, float const s) {
     v2->w = v->w / s;
 
     return v2;
+}
+
+vec4* vec4_make(void) {
+    return (vec4 *)calloc(1, sizeof(vec4));
 }
 
 vec3* vec3_make(void) {
@@ -110,6 +114,16 @@ vec3 *vec3_normalize(vec3* const v) {
 
 float vec4_dot(vec4* const a, vec4* const b) {
     return (a->x * b->x) + (a->y * b->y) + (a->z * b->z) + (a->w * b->w);
+}
+
+vec4* vec4_cross(vec4* const a, vec4* const b) {
+    vec4 *v  = vec4_make();
+    v->x = (a->y * b->z) - (b->y * a->z);
+    v->y = (a->z * b->x) - (b->z * a->x);
+    v->z = (a->x * b->y) - (b->x * a->y);
+    v->w = 1.0;
+
+    return v;
 }
 
 vec3* vec3_cross(vec3* const a, vec3* const b) {

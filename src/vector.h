@@ -25,8 +25,11 @@ vec4 *vec4_div_scalar(vec4* const v, float const s);
 vec4 *vec4_normalize(vec4* const v);
 vec3 *vec3_normalize(vec3* const v);
 
+float vec4_dot(vec4* const a, vec4* const b);
+vec4* vec4_cross(vec4* const a, vec4* const b);
 vec3* vec3_cross(vec3* const a, vec3* const b);
 
+vec4* vec4_make(void);
 vec3* vec3_make(void);
 
 void vec4_print(vec4* const v);
