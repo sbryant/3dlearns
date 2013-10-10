@@ -239,7 +239,7 @@ int main(int argc, char** argv) {
     int pause = 0;
 
     uint64_t now = SDL_GetPerformanceCounter();
-    float factor = (float)now / tick;
+    float factor = 0.0;
     float a =  30.0 * (PI/180.0);
 
     /* get handle to hold verts we upload */
@@ -251,11 +251,12 @@ int main(int argc, char** argv) {
         glUseProgram( shader_prog );
         //  float dt = (float)(now - old) / tick;
 
-        if (!pause)
+        if (!pause) {
+            old = now;
             now = SDL_GetPerformanceCounter();
-        factor = (float)now / tick;
-        old = now;
+        }
 
+        factor = now / (float)tick;
 
         mat4x4 *trans = mat4x4_rotate(ident, factor * a, &axis);
         float *data =  mat4x4_make_array(trans);
