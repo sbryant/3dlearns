@@ -300,6 +300,8 @@ int main(int argc, char** argv) {
 
     mat4x4_cleanup(ident);
     free(ident_data);
+    free(proj_data);
+    free(view_data);
 
     glDeleteProgram(shader_prog);
     glDeleteShader(frag_shader);
