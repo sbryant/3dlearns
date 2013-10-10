@@ -42,10 +42,6 @@ mat4x4* look_at(vec3 *pos, vec3 *center, vec3 *up) {
     p->y[2] = -f->y;
     p->z[2] = -f->z;
 
-    printf("Look At P:\n");
-    mat4x4_print(p);
-    printf("\n");
-
     mat4x4* res = mat4x4_translate(p, -pos->x, -pos->y, -pos->z);
 
     mat4x4_cleanup(p);
