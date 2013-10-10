@@ -240,13 +240,12 @@ int main(int argc, char** argv) {
 
     uint64_t now = SDL_GetPerformanceCounter();
     float factor = (float)now / tick;
-    float a =  20.0 * (PI/180.0);
-
-    glEnable(GL_DEPTH_TEST);
+    float a =  30.0 * (PI/180.0);
 
     /* get handle to hold verts we upload */
     while(true) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
         glClearColor(0.0, 0.0, 0.0, 1.0);
 
         glUseProgram( shader_prog );
