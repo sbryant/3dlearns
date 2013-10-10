@@ -107,6 +107,12 @@ void mat4x4_print(mat4x4* m) {
     }
 }
 
+void mat4x4_cleanup_comp(mat4x4* m) {
+    free(m->x);
+    free(m->y);
+    free(m->z);
+    free(m->w);
+}
 
 mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec3* axis) {
     mat4x4 r; mat4x4_init(&r); mat4x4_make_ident(&r);
@@ -140,15 +146,12 @@ mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec3* axis) {
     }
 
     mat4x4 *res = mat4x4_mul(&r, m);
+    mat4x4_cleanup_comp(&r);
 
     return res;
 }
 
-
 void mat4x4_cleanup(mat4x4* m) {
-    free(m->x);
-    free(m->y);
-    free(m->z);
-    free(m->w);
+    mat4x4_cleanup_comp(m);
     free(m);
 }
