@@ -239,7 +239,7 @@ int main(int argc, char** argv) {
 
     uint64_t now = SDL_GetPerformanceCounter();
     float factor = 0.0;
-    float a =  30.0 * (PI/180.0);
+    float a =  180.0 * (PI/180.0);
 
     /* get handle to hold verts we upload */
     while(true) {
