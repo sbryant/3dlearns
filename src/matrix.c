@@ -63,10 +63,10 @@ mat4x4* mat4x4_init(mat4x4* r) {
     if (!r)
         r = (mat4x4*)calloc(1, sizeof(mat4x4));
 
-    r->x = (float*)calloc(4, sizeof(float));
-    r->y = (float*)calloc(4, sizeof(float));
-    r->z = (float*)calloc(4, sizeof(float));
-    r->w = (float*)calloc(4, sizeof(float));
+    r->x = (r->m);
+    r->y = (r->m)+4;
+    r->z = (r->m)+8;
+    r->w = (r->m)+12;
 
     return r;
 }
@@ -74,10 +74,7 @@ mat4x4* mat4x4_init(mat4x4* r) {
 mat4x4* mat4x4_make_ident(mat4x4* m) {
     mat4x4* r = !m ? mat4x4_init(NULL) : m;
 
-    memset((void*)(r->x), 0, sizeof(float) * 4);
-    memset((void*)(r->y), 0, sizeof(float) * 4);
-    memset((void*)(r->z), 0, sizeof(float) * 4);
-    memset((void*)(r->w), 0, sizeof(float) * 4);
+    memset((void*)&(r->m), 0, sizeof(float) * 16);
 
     r->x[0] = 1.0;
     r->y[1] = 1.0;
@@ -90,10 +87,7 @@ mat4x4* mat4x4_make_ident(mat4x4* m) {
 float* mat4x4_make_array(mat4x4* const m) {
     float *r = (float*)calloc(16, sizeof(float));
 
-    memcpy((void*)r, (void*)(m->x), sizeof(float) * 4);
-    memcpy((void*)(r+4), (void*)(m->y), sizeof(float) * 4);
-    memcpy((void*)(r+8), (void*)(m->z), sizeof(float) * 4);
-    memcpy((void*)(r+12), (void*)(m->w), sizeof(float) * 4);
+    memcpy((void*)r, &m->m, sizeof(float) * 16);
     return r;
 }
 
@@ -108,10 +102,10 @@ void mat4x4_print(mat4x4* m) {
 }
 
 void mat4x4_cleanup_comp(mat4x4* m) {
-    free(m->x);
-    free(m->y);
-    free(m->z);
-    free(m->w);
+    m->x = NULL;
+    m->y = NULL;
+    m->z = NULL;
+    m->w = NULL;
 }
 
 mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec3* axis) {

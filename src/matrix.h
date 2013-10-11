@@ -7,6 +7,7 @@
 
 /* Column Major */
 typedef struct s_mat4x4 {
+    float m[16];
     float *x;
     float *y;
     float *z;
