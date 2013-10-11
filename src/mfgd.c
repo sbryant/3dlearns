@@ -224,7 +224,6 @@ int main(int argc, char** argv) {
     mat4x4_cleanup(view);
 
     mat4x4 *ident = mat4x4_make_ident(NULL);
-    float *ident_data = mat4x4_make_array(ident);
 
     float fovy_rad = 45.0 * PI / 180.0;
     mat4x4 *proj =  perspective(fovy_rad, 800.0 / 600.0 , 1.0, 10.0f);
@@ -259,13 +258,9 @@ int main(int argc, char** argv) {
         factor = now / (float)tick;
 
         mat4x4 *trans = mat4x4_rotate(ident, factor * a, &axis);
-        float *data =  mat4x4_make_array(trans);
-
-        //view_data = ident_data;
-        //proj_data = ident_data;
         glUniformMatrix4fv(view_uni, 1, GL_FALSE, view_data);
         glUniformMatrix4fv(proj_uni, 1, GL_FALSE, proj_data);
-        glUniformMatrix4fv(model_uni, 1, GL_FALSE, data);
+        glUniformMatrix4fv(model_uni, 1, GL_FALSE, trans->m);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         SDL_GL_SwapWindow(screen);
@@ -273,7 +268,6 @@ int main(int argc, char** argv) {
         SDL_Event event;
         int quit = 0;
         mat4x4_cleanup(trans);
-        free(data);
 
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -299,7 +293,6 @@ int main(int argc, char** argv) {
     }
 
     mat4x4_cleanup(ident);
-    free(ident_data);
     free(proj_data);
     free(view_data);
 
