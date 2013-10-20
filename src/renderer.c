@@ -6,6 +6,10 @@ renderer* make_renderer(int w, int h) {
     renderer* r = (renderer*)calloc(1, sizeof(renderer));
     renderer_set_size(r, w, h);
 
+    r->camera_pos = vec3_make();
+    r->camera_dir = vec3_make();
+    r->camera_up  = vec3_make();
+
     return r;
 }
 
