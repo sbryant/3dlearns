@@ -209,9 +209,7 @@ int main(int argc, char** argv) {
     mat4x4_cleanup(proj);
     mat4x4_cleanup(ident);
 
-    glDeleteProgram(s->program);
-    glDeleteShader(s->fragment_shader);
-    glDeleteShader(s->vertex_shader);
+    shader_cleanup(s);
 
     glDeleteBuffers(1, &vbo);
     glDeleteVertexArrays(1, &vao);
