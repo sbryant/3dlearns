@@ -34,4 +34,6 @@ vec3* vec3_cross(vec3* const a, vec3* const b);
 vec4* vec4_make(void);
 vec3* vec3_make(void);
 
+void vec3_set_vec3(vec3 *v1, vec3 *v2);
+
 void vec4_print(vec4* const v);
