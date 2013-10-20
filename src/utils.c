@@ -8,7 +8,6 @@
 
 #include "utils.h"
 
-
 char *read_shader(const char* path) {
 	int fd = open(path, O_RDONLY);
 	char buffer[GLPG_SHADER_READ_SIZE];
@@ -97,3 +96,9 @@ float approach(float goal, float current, float dt) {
     return goal;
 }
 
+void get_screen_size(int *w, int *h) {
+    SDL_DisplayMode info;
+    SDL_GetCurrentDisplayMode(0, &info);
+    *w = info.w;
+    *h = info.h;
+}
