@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
     GLuint proj_uni = glGetUniformLocation(s->program, "proj");
 
     vec3 camera = { 0.0, 0.0, 8.0 };
-    vec3 center = { 0.0, 0.0000001, 0.0};
+    vec3 center = { 0.0, 0.0, 0.0};
     vec3 up = { 0.0, 1.0, 0.0 };
     vec3 axis = { 0.0, 1.0, 0.0 };
 
