@@ -149,3 +149,7 @@ void mat4x4_cleanup(mat4x4* m) {
     mat4x4_cleanup_comp(m);
     free(m);
 }
+
+void mat4x4_set_mat4x4(mat4x4 *m1, const mat4x4 *m2) {
+    memcpy(&(m1->m), &(m2->m), sizeof(float) * 16);
+}
