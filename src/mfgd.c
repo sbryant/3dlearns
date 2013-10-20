@@ -7,17 +7,9 @@
 #include "utils.h"
 #include "assert.h"
 
-float approach(float goal, float current, float dt) {
-    float diff = goal - current;
 
-    if (diff > dt)
-        return current + dt;
 
-    if (diff < -dt)
-        return current - dt;
 
-    return goal;
-}
 
 int main(int argc, char** argv) {
     SDL_Init(SDL_INIT_VIDEO);
