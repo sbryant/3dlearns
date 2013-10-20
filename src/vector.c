@@ -35,6 +35,16 @@ vec4* vec4_add(vec4* const v1, vec4* const v2) {
     return vr;
 }
 
+vec3* vec3_add(vec3* const v1, vec3* const v2) {
+    vec3 *vr = vec3_make();
+
+    vr->x = v1->x + v2->x;
+    vr->y = v1->y + v2->y;
+    vr->z = v1->z + v2->z;
+
+    return vr;
+}
+
 vec4* vec4_sub(vec4* const v1, vec4* const v2) {
     vec4 *vr = vec4_make();
 
@@ -65,6 +75,16 @@ vec4 *vec4_mul_scalar(vec4* const v, float const s) {
     v2->y = v->y * s;
     v2->z = v->z * s;
     v2->w = v->w * s;
+
+    return v2;
+}
+
+vec3 *vec3_mul_scalar(vec3* const v, float const s) {
+    vec3* v2 = vec3_make();
+
+    v2->x = v->x * s;
+    v2->y = v->y * s;
+    v2->z = v->z * s;
 
     return v2;
 }

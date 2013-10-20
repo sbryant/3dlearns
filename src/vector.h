@@ -16,10 +16,12 @@ float vec4_length(vec4* const v);
 float vec4_length_square(vec4* const v);
 
 vec4* vec4_add(vec4* const v1, vec4* const v2);
+vec3* vec3_add(vec3* const v1, vec3* const v2);
 vec4* vec4_sub(vec4* const v1, vec4* const v2);
 vec3* vec3_sub(vec3* const v1, vec3* const v2);
 
 vec4 *vec4_mul_scalar(vec4* const v, float const s);
+vec3 *vec3_mul_scalar(vec3* const v, float const s);
 vec4 *vec4_div_scalar(vec4* const v, float const s);
 
 vec4 *vec4_normalize(vec4* const v);
