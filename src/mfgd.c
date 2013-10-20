@@ -112,42 +112,21 @@ int main(int argc, char** argv) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo );
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
 
-    GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
-    char* vert_source = read_shader("shaders/simple_vert.glsl");
-    assert(vert_source != NULL);
+    shader *s = make_shader("model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
+    shader_compile(s);
 
-    glShaderSource(vert_shader, 1, (const GLchar**)&vert_source, NULL);
+    glUseProgram(s->program);
 
-    glCompileShader(vert_shader);
+    glEnableVertexAttribArray(s->pos_attr);
+    glVertexAttribPointer( s->pos_attr, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), 0 );
 
-    GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    GLchar* frag_source = (GLchar*)read_shader("shaders/simple_frag.glsl");
-    assert(frag_source != NULL);
+    glEnableVertexAttribArray(s->color_attr);
+    glVertexAttribPointer( s->color_attr, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3 * sizeof(float)));
 
-    glShaderSource(frag_shader, 1, (const GLchar**)&frag_source, NULL);
-    glCompileShader(frag_shader);
 
-    GLuint shader_prog = glCreateProgram();
-    glAttachShader(shader_prog, vert_shader);
-    glAttachShader(shader_prog, frag_shader);
-
-    glUseProgram( shader_prog );
-
-    glBindFragDataLocation( shader_prog, 0, "outColor" );
-
-    glLinkProgram( shader_prog );
-
-    GLint pos_attr = glGetAttribLocation( shader_prog, "position" );
-    glEnableVertexAttribArray(pos_attr);
-    glVertexAttribPointer( pos_attr, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), 0 );
-
-    GLint color_attr = glGetAttribLocation( shader_prog, "color" );
-    glEnableVertexAttribArray(color_attr);
-    glVertexAttribPointer( color_attr, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3 * sizeof(float)));
-
-    GLuint model_uni = glGetUniformLocation(shader_prog, "model");
-    GLuint view_uni = glGetUniformLocation(shader_prog, "view");
-    GLuint proj_uni = glGetUniformLocation(shader_prog, "proj");
+    GLuint model_uni = glGetUniformLocation(s->program, "model");
+    GLuint view_uni = glGetUniformLocation(s->program, "view");
+    GLuint proj_uni = glGetUniformLocation(s->program, "proj");
 
     vec3 camera = { 0.0, 0.0, 8.0 };
     vec3 center = { 0.0, 0.0000001, 0.0};
@@ -158,18 +137,12 @@ int main(int argc, char** argv) {
     printf("View Matrix:\n");
     mat4x4_print(view);
     printf("\n");
-    float* view_data = mat4x4_make_array(view);
-    mat4x4_cleanup(view);
-
-    mat4x4 *ident = mat4x4_make_ident(NULL);
 
     float fovy_rad = 45.0 * PI / 180.0;
     mat4x4 *proj =  perspective(fovy_rad, 800.0 / 600.0 , 1.0, 10.0f);
     printf("PerspectiveProj Matrix:\n");
     mat4x4_print(proj);
     printf("\n");
-    float* proj_data = mat4x4_make_array(proj);
-    mat4x4_cleanup(proj);
 
     uint64_t old = SDL_GetPerformanceCounter();
     unsigned long tick = SDL_GetPerformanceFrequency();
@@ -178,14 +151,16 @@ int main(int argc, char** argv) {
     uint64_t now = SDL_GetPerformanceCounter();
     float factor = 0.0;
     float a =  180.0 * (PI/180.0);
+    mat4x4 *ident = mat4x4_make_ident(NULL);
 
     /* get handle to hold verts we upload */
     while(true) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_MULTISAMPLE);
         glClearColor(0.0, 0.0, 0.0, 1.0);
 
-        glUseProgram( shader_prog );
+        glUseProgram( s->program );
         //  float dt = (float)(now - old) / tick;
 
         if (!pause) {
@@ -196,8 +171,8 @@ int main(int argc, char** argv) {
         factor = now / (float)tick;
 
         mat4x4 *trans = mat4x4_rotate(ident, factor * a, &axis);
-        glUniformMatrix4fv(view_uni, 1, GL_FALSE, view_data);
-        glUniformMatrix4fv(proj_uni, 1, GL_FALSE, proj_data);
+        glUniformMatrix4fv(view_uni, 1, GL_FALSE, view->m);
+        glUniformMatrix4fv(proj_uni, 1, GL_FALSE, proj->m);
         glUniformMatrix4fv(model_uni, 1, GL_FALSE, trans->m);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -230,16 +205,18 @@ int main(int argc, char** argv) {
             break;
     }
 
+    mat4x4_cleanup(view);
+    mat4x4_cleanup(proj);
     mat4x4_cleanup(ident);
-    free(proj_data);
-    free(view_data);
 
-    glDeleteProgram(shader_prog);
-    glDeleteShader(frag_shader);
-    glDeleteShader(vert_shader);
+    glDeleteProgram(s->program);
+    glDeleteShader(s->fragment_shader);
+    glDeleteShader(s->vertex_shader);
 
     glDeleteBuffers(1, &vbo);
     glDeleteVertexArrays(1, &vao);
+
+    free(r);
 
     SDL_GL_DeleteContext(opengl3_context);
     SDL_DestroyWindow(screen);
