@@ -18,6 +18,15 @@ shader *make_shader(const char* name, const char* vertex_path, const char* frag_
 
 void shader_cleanup(shader* s) {
     /* TODO CLEAN UP */
+
+    glDetachShader(s->program, s->vertex_shader);
+    glDetachShader(s->program, s->fragment_shader);
+    glDeleteShader(s->vertex_shader);
+    glDeleteShader(s->fragment_shader);
+    glDeleteProgram(s->program);
+
+    free(s);
+    s = NULL;
 }
 
 
