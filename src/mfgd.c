@@ -26,8 +26,8 @@ int main(int argc, char** argv) {
     SDL_Window *screen = SDL_CreateWindow("MFGD",
                                           SDL_WINDOWPOS_UNDEFINED,
                                           SDL_WINDOWPOS_UNDEFINED,
-                                          800, 600,
-                                          SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+                                          0, 0,
+                                          SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL);
 
     /* initialize a render context, managed by SDL */
     SDL_GLContext *opengl3_context = SDL_GL_CreateContext(screen);
@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
     printf("\n");
 
     float fovy_rad = 45.0 * PI / 180.0;
-    mat4x4 *proj =  perspective(fovy_rad, 800.0 / 600.0 , 1.0, 10.0f);
+    mat4x4 *proj =  perspective(fovy_rad, 16.0 / 9.0 , 0.1, 1000.0f);
     printf("PerspectiveProj Matrix:\n");
     mat4x4_print(proj);
     printf("\n");
