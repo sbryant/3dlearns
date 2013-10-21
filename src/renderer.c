@@ -223,7 +223,6 @@ void rendering_context_render_box(rendering_context* rc, vec3 *min, vec3 *max) {
         mfu->x, mfu->y, mfu->z
     };
 
-//    render_context *r = rc->context;
 
     rendering_context_begin_render_tri_fan(rc);
     rendering_context_render_tri_face(rc, back_verts, sizeof(back_verts) / sizeof(float));
