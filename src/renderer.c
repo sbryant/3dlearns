@@ -113,14 +113,17 @@ void renderer_start_rendering(renderer *rndr, rendering_context *rc) {
 
     float aspect = rndr->width/rndr->height;
 
+    mat4x4 *ident = mat4x4_make_ident(NULL);
+
     mat4x4 *proj = perspective(rndr->camera_fov, aspect, rndr->camera_near, rndr->camera_far);
     rendering_context_set_projection(rc, proj);
-    free(proj);
 
     mat4x4 *view = look_at(rndr->camera_pos, rndr->camera_dir, rndr->camera_up);
     rendering_context_set_view(rc, view);
-    free(view);
 
+    mat4x4_cleanup(view);
+    mat4x4_cleanup(ident);
+    mat4x4_cleanup(proj);
 
     glViewport(0, 0, rndr->width, rndr->height);
 
