@@ -121,10 +121,6 @@ void renderer_start_rendering(renderer *rndr, rendering_context *rc) {
     rendering_context_set_view(rc, view);
     free(view);
 
-    for(int i = 0; i < 16; i++) {
-        rndr->model_view[i] = rendering_context_view(rc)->m[i];
-        rndr->proj[i] = rendering_context_projection(rc)->m[i];
-    }
 
     glViewport(0, 0, rndr->width, rndr->height);
 
