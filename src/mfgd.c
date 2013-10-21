@@ -44,8 +44,8 @@ int main(int argc, char** argv) {
     SDL_Window *screen = SDL_CreateWindow("MFGD",
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
-                                          800, 600,
-                                          SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+                                          0, 0,
+                                          SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL);
 
     /* initialize a render context, managed by SDL */
     SDL_GLContext *opengl3_context = SDL_GL_CreateContext(screen);
