@@ -21,9 +21,6 @@ typedef struct s_renderer {
     vec3 *camera_up;
     float camera_fov, camera_near, camera_far;
 
-    float model_view[16];
-    float proj[16];
-
     shader *shader;
 
 } renderer;
