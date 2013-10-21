@@ -37,7 +37,6 @@ typedef struct s_render_context {
 
 } render_context;
 
-
 typedef struct s_rendering_context {
     size_t num_render_contexts;
     render_context *context;
@@ -52,6 +51,8 @@ typedef struct s_rendering_context {
     int program;
     unsigned int vbo;
 } rendering_context;
+
+extern app* application;
 
 renderer* make_renderer(int w, int h);
 void renderer_initialize(renderer* r);
