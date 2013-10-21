@@ -35,13 +35,14 @@ char *read_shader(const char* path) {
 mat4x4* look_at(vec3 *pos, vec3 *center, vec3 *up) {
     mat4x4* p = mat4x4_make_ident(NULL);
 
-    vec3* front = vec3_sub(center, pos);
+    vec3 *ce = vec3_sub(center, pos);
+    vec3 *f = vec3_normalize(ce);
 
-    vec3* f = vec3_normalize(front);
-    vec3* side = vec3_cross(f, up);
+    vec3 *nu = vec3_normalize(up);
+    vec3 *fnu = vec3_cross(f, nu);
+    vec3 *s = vec3_normalize(fnu);
 
-    vec3* s = vec3_normalize(side);
-    vec3* u = vec3_cross(s, f);
+    vec3 *u = vec3_cross(s, f);
 
     p->x[0] = s->x;
     p->y[0] = s->y;
@@ -55,16 +56,11 @@ mat4x4* look_at(vec3 *pos, vec3 *center, vec3 *up) {
     p->y[2] = -f->y;
     p->z[2] = -f->z;
 
-    mat4x4* res = mat4x4_translate(p, -pos->x, -pos->y, -pos->z);
+    p->w[0] = -vec3_dot(s, pos);
+    p->w[1] = -vec3_dot(u, pos);
+    p->w[2] = vec3_dot(f, pos);
 
-    mat4x4_cleanup(p);
-    free(front);
-    free(side);
-    free(s);
-    free(u);
-    free(f);
-
-    return res;
+    return p;
 }
 
 
@@ -72,18 +68,22 @@ mat4x4* perspective(const float fovy, const float aspect, const float znear, con
     assert(aspect != 0.0);
     assert(znear != zfar);
 
-    float f = 1.0 / tan(fovy / 2.0);
+    const float rad = fovy * PI / 180.0f;
+    float tan_half_fovy = tan(rad / 2.0f);
 
     mat4x4 *res = mat4x4_make_ident(NULL);
-    res->x[0] = f / aspect;
-    res->y[1] = f;
-    res->z[2] = (zfar+znear) / (znear-zfar);
+    res->x[0] = 1.0f / (aspect * tan_half_fovy);
+    res->y[1] = 1.0f / tan_half_fovy;
+
+    res->z[2] = -(zfar + znear) / (zfar - znear);
     res->z[3] = -1.0;
-    res->w[2] = (2 * zfar * znear) / (znear-zfar);
+
+    res->w[2] = -(2.0 * zfar * znear) / (zfar - znear);
     res->w[3] = 0.0;
 
     return res;
 }
+
 float approach(float goal, float current, float dt) {
     float diff = goal - current;
 
@@ -98,6 +98,7 @@ float approach(float goal, float current, float dt) {
 
 void get_screen_size(int *w, int *h) {
     SDL_DisplayMode info;
+
     SDL_GetCurrentDisplayMode(0, &info);
     *w = info.w;
     *h = info.h;
