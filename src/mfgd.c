@@ -17,7 +17,90 @@ typedef struct s_character {
 
 character box;
 
+void update(float dt) {
+    box.velocity.x = approach(box.velocity_goal.x, box.velocity.x, dt * 65.0f);
+    box.velocity.z = approach(box.velocity_goal.z, box.velocity.z, dt * 65.0f);
 
+    vec3 *new_vel = vec3_mul_scalar(&(box.velocity), dt);
+    vec3 *new_pos = vec3_add(&(box.pos), new_vel);
+
+    vec3_set_vec3(&(box.pos), new_pos);
+    free(new_vel); free(new_pos);
+
+    new_vel = NULL;
+
+    vec3 *new_grav = vec3_mul_scalar(&(box.gravity), dt);
+    new_vel = vec3_add(&(box.velocity), new_grav);
+    vec3_set_vec3(&(box.velocity), new_vel);
+    free(new_grav); free(new_vel);
+
+    if (box.pos.y < 0)
+        box.pos.y = 0.0f;
+}
+
+void draw(renderer *rndr) {
+    vec3 shift = { 0.0, 4.0, -6.0 };
+    vec3 *camera_pos = vec3_add(&(box.pos), &shift);
+    renderer_set_camera_position(rndr, camera_pos);
+    free(camera_pos);
+
+    vec3 *temp_pos = vec3_sub(&(box.pos), renderer_camera_position(rndr));
+    vec3 *new_dir = vec3_normalize(temp_pos);
+
+    renderer_set_camera_dir(rndr, new_dir);
+    free(temp_pos); free(new_dir);
+
+    vec3 up = { 0.0, 1.0, 0.0 };
+    renderer_set_camera_up(rndr, &up);
+    renderer_set_camera_fov(rndr, 90.0f);
+    renderer_set_camera_near(rndr, 0.1f);
+    renderer_set_camera_far(rndr, 1000.0);
+
+    glUseProgram(rndr->shader->program);
+
+    rendering_context *rc = make_rendering_context(rndr);
+
+    glClearColor(210.0 / 255.0, 230.0 / 255.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    renderer_start_rendering(rndr, rc);
+
+    vec4 color = { 0.8, 0.4, 0.2, 1.0 };
+    rendering_context_set_uniform_vec4(rc, "vecColor", &color);
+
+    vec3 player_shift_min = { 0.5, 0.0, 0.5 };
+    vec3 player_shift_max = { 0.5, 2.0, 0.5 };
+    vec3 *player_pos_min = vec3_sub(&(box.pos), &player_shift_min);
+    vec3 *player_pos_max = vec3_add(&(box.pos), &player_shift_max);
+
+    rendering_context_render_box(rc, player_pos_min, player_pos_max);
+
+    vec4 color2 = { 0.3, 0.9, 0.5, 1.0 };
+    vec3 box_temp_pos = { 6.0, 0.0, 4.0 };
+    vec3 box_shift_min = { 0.5, 0.0, 0.5 };
+    vec3 box_shift_max = { 0.5, 1.0, 0.5 };
+    vec3 *box_pos_min = vec3_sub(&box_temp_pos, &box_shift_min);
+    vec3 *box_pos_max = vec3_add(&box_temp_pos, &box_shift_max);
+
+    rendering_context_set_uniform_vec4(rc, "vecColor", &color2);
+    rendering_context_render_box(rc, box_pos_min, box_pos_max);
+
+    static vec4 color3 = { 0.6, 0.7, 0.9, 1.0 };
+
+    static float verts[] = {
+        -30.0, 0.0, -30.0,
+        -30.0, 0.0, 30.0,
+        30.0, 0.0, 30.0,
+        30.0, 0.0, -30.0
+    };
+
+    rendering_context_set_uniform_vec4(rc, "vecColor", &color3);
+    rendering_context_begin_render_tri_fan(rc);
+    rendering_context_render_tri_face(rc, verts, sizeof(verts) / sizeof(float));
+    rendering_context_end_render(rc);
+
+    renderer_finish_rendering(rndr, rc);
+}
 
 int main(int argc, char** argv) {
     SDL_Init(SDL_INIT_VIDEO);
