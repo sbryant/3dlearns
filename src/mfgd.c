@@ -166,76 +166,8 @@ int main(int argc, char** argv) {
     glGenVertexArrays( 1, &vao );
     glBindVertexArray( vao );
 
-    GLfloat vertices[] = {
-    -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-
-    -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-
-    -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-
-     0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-
-    -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-
-    -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-
-    -1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f,
-     1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f,
-     1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f,
-     1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f,
-    -1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f,
-    -1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f
-    };
-
     shader *s = make_shader("model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
     shader_compile(s);
-
-    glUseProgram(s->program);
-
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(s->pos_attr);
-    glVertexAttribPointer(s->pos_attr, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
-
-    glEnableVertexAttribArray(s->color_attr);
-    glVertexAttribPointer(s->color_attr, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
-
-    memset(&box, 0, sizeof(character));
-    box.gravity.y = -4.0;
 
     int w, h;
     get_screen_size(&w, &h);
@@ -245,53 +177,43 @@ int main(int argc, char** argv) {
     /* hook renderer up with our shader prog */
     r->shader = s;
 
-    vec3 cam = { 2.5f, 2.5f, 2.0f };
-    vec3 c_up = { 0.0f, 0.0f, 1.0f };
-    vec3 c_at = { 0.0f, 0.0f, 0.0f };
-
-    mat4x4 *view = look_at(&cam, &c_at, &c_up);
-
-    printf("View Matrix:\n");
-    mat4x4_print(view);
-    printf("\n");
-    fflush(stdout);
-
-    mat4x4 *proj = perspective(45.0f, 800.0f / 600.0f, 1.0, 10.0f);
-    printf("Porj Matrix:\n");
-    mat4x4_print(proj);
-    printf("\n");
-    fflush(stdout);
-
-    GLint uniView = glGetUniformLocation(s->program, "view");
-
-
-    GLint uniProj = glGetUniformLocation(s->program, "proj");
-
-    GLint uniModel = glGetUniformLocation(s->program, "model");
-
-    GLint uniColor = glGetUniformLocation(s->program, "overrideColor");
-
-    int tick = 1000;
-
     glEnable(GL_DEPTH_TEST);
+    uint32_t old = SDL_GetTicks();
     uint32_t now = SDL_GetTicks();
     int pause = 0;
     while(true) {
         SDL_Event event;
         int quit = 0;
 
-
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_KEYDOWN:
-                if (event.key.keysym.sym == SDLK_SPACE)
+                if (event.key.keysym.sym == SDLK_p)
                     pause = 1;
+                if (event.key.keysym.sym == SDLK_a)
+                    box.velocity_goal.x = 15.0f;
+                if (event.key.keysym.sym == SDLK_w)
+                    box.velocity_goal.z = 15.0f;
+                if (event.key.keysym.sym == SDLK_s)
+                    box.velocity_goal.z = -15.0f;
+                if (event.key.keysym.sym == SDLK_d)
+                    box.velocity_goal.x = -15.0f;
+                if (event.key.keysym.sym == SDLK_SPACE)
+                    box.velocity.y = 5.0f;
                 break;
             case SDL_KEYUP:
-                if (event.key.keysym.sym == SDLK_SPACE)
+                if (event.key.keysym.sym == SDLK_p)
                     pause = 0;
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     quit = 1;
+                if (event.key.keysym.sym == SDLK_a)
+                    box.velocity_goal.x = 0.0f;
+                if (event.key.keysym.sym == SDLK_w)
+                    box.velocity_goal.z = 0.0f;
+                if (event.key.keysym.sym == SDLK_s)
+                    box.velocity_goal.z = 0.0f;
+                if (event.key.keysym.sym == SDLK_d)
+                    box.velocity_goal.x = 0.0f;
                 break;
             case SDL_QUIT:
                 quit = 1;
@@ -302,53 +224,18 @@ int main(int argc, char** argv) {
         if (quit == 1) // if received instruction to quit
             break;
 
-
-        if (!pause)
+        if (!pause) {
+            old = now;
             now = SDL_GetTicks();
+        }
 
-        glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        mat4x4 *ident = mat4x4_make_ident(NULL);
-        vec3 up = { 0.0f, 0.0f, 1.0f };
-
-        glUniformMatrix4fv(uniView, 1, GL_FALSE, view->m);
-        glUniformMatrix4fv(uniProj, 1, GL_FALSE, proj->m);
-
-        float rotate = now / (float)tick * 180.0f;
-        rotate = rotate * PI / 180.0f;
-        mat4x4 *model = mat4x4_rotate(ident, rotate, &up);
-        glUniformMatrix4fv(uniModel, 1, GL_FALSE, model->m);
-
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        glEnable(GL_STENCIL_TEST);
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-        glStencilMask(0xFF);
-        glDepthMask(GL_FALSE);
-        glClear(GL_STENCIL_BUFFER_BIT);
-
-        glDrawArrays(GL_TRIANGLES, 36, 6);
-
-        glStencilFunc(GL_EQUAL, 1, 0xFF);
-        glStencilMask(0x00);
-        glDepthMask(GL_TRUE);
-
-        mat4x4 *trans = mat4x4_translate(model, 0.0, 0.0, -1.0);
-        mat4x4_scale(trans, 1.0, 1.0, -1.0);
-
-        glUniformMatrix4fv(uniModel, 1, GL_FALSE, trans->m);
-
-        glUniform3f(uniColor, 0.3f, 0.3f, 0.3f);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glUniform3f(uniColor, 1.0f, 1.0f, 1.0f);
-        glDisable(GL_STENCIL_TEST);
+        float dt = now - old;
+        if (dt > 0.15f)
+             dt = 0.15f;
+        update(dt);
+        draw(r);
         SDL_GL_SwapWindow(screen);
 
-        mat4x4_cleanup(trans);
-        mat4x4_cleanup(ident);
-        mat4x4_cleanup(model);
     }
 
     shader_cleanup(s);
