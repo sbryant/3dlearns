@@ -160,6 +160,10 @@ int main(int argc, char** argv) {
              glsl_ver );
 
     memset(&box, 0, sizeof(character));
+    box.pos.x = box.pos.y = box.pos.z = 0.0f;
+    box.velocity.x = box.velocity.y = box.velocity.z = 0.0f;
+    box.velocity_goal.x = box.velocity_goal.y = box.velocity_goal.z = 0.0f;
+    box.gravity.x = box.gravity.y = box.gravity.z = 0.0f;
     box.gravity.y = -4.0f;
 
     GLuint vao;
