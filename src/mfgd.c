@@ -5,6 +5,7 @@
 #include "matrix.h"
 #include "vector.h"
 #include "utils.h"
+#include "renderer.h"
 #include "shader.h"
 
 
