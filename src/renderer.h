@@ -40,7 +40,6 @@ typedef struct s_render_context {
 
 typedef struct s_rendering_context {
     size_t num_render_contexts;
-    render_context **contexts;
     render_context *context;
 
     int num_verts;
