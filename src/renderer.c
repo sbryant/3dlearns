@@ -2,6 +2,8 @@
 #include "utils.h"
 #include <GL/glew.h>
 
+app* application = NULL;
+
 renderer* make_renderer(int w, int h) {
     renderer* r = (renderer*)calloc(1, sizeof(renderer));
     renderer_set_size(r, w, h);
