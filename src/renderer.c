@@ -79,9 +79,6 @@ rendering_context* make_rendering_context(renderer* rndr) {
     render_context* rc = make_render_context();
 
     r->context = rc;
-    r->contexts = (render_context**)calloc(RC_MAX_CONTEXTS, sizeof(render_context*));
-    r->contexts[0] = rc;
-    r->num_render_contexts = 1;
 
     r->shader = rndr->shader;
     r->program = r->shader->program;
