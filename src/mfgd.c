@@ -68,17 +68,18 @@ void draw(renderer *rndr) {
     vec4 color = { 0.8, 0.4, 0.2, 1.0 };
     rendering_context_set_uniform_vec4(rc, "vecColor", &color);
 
-    vec3 player_shift_min = { 0.5, 0.0, 0.5 };
-    vec3 player_shift_max = { 0.5, 2.0, 0.5 };
-    vec3 *player_pos_min = vec3_sub(&(box.pos), &player_shift_min);
-    vec3 *player_pos_max = vec3_add(&(box.pos), &player_shift_max);
+    vec3 player_shift_min = { 0.5f, 0.0f, 0.5f };
+    vec3 player_shift_max = { 0.5f, 2.0f, 0.5f };
+    vec3 pos = box.pos;
+    vec3 *player_pos_min = vec3_sub(&pos, &player_shift_min);
+    vec3 *player_pos_max = vec3_add(&pos, &player_shift_max);
 
     rendering_context_render_box(rc, player_pos_min, player_pos_max);
 
     vec4 color2 = { 0.3, 0.9, 0.5, 1.0 };
-    vec3 box_temp_pos = { 6.0, 0.0, 4.0 };
-    vec3 box_shift_min = { 0.5, 0.0, 0.5 };
-    vec3 box_shift_max = { 0.5, 1.0, 0.5 };
+    vec3 box_temp_pos = { 6.0f, 0.0f, 4.0f };
+    vec3 box_shift_min = { 0.5f, 0.0f, 0.5f };
+    vec3 box_shift_max = { 0.5f, 1.0f, 0.5f };
     vec3 *box_pos_min = vec3_sub(&box_temp_pos, &box_shift_min);
     vec3 *box_pos_max = vec3_add(&box_temp_pos, &box_shift_max);
 

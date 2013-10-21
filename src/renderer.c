@@ -163,9 +163,9 @@ void rendering_context_render_tri_face(rendering_context *r, float *face, int si
 }
 
 void rendering_context_render_box(rendering_context* rc, vec3 *min, vec3 *max) {
-    vec3 forward = { max->x - min->x, 0.0, 0.0 };
-    vec3 up = { 0.0, max->y - min->y, 0.0 };
-    vec3 right = { 0.0, 0.0, max->z - min->z };
+    vec3 forward = { max->x - min->x, 0.0f, 0.0f };
+    vec3 up = { 0.0f, max->y - min->y, 0.0f };
+    vec3 right = { 0.0f, 0.0f, max->z - min->z };
 
     vec3 *mr = vec3_add(min, &right);
     vec3 *mru = vec3_add(mr, &up);
@@ -224,7 +224,6 @@ void rendering_context_render_box(rendering_context* rc, vec3 *min, vec3 *max) {
         mf->x, mf->y, mf->z,
         mfu->x, mfu->y, mfu->z
     };
-
 
     rendering_context_begin_render_tri_fan(rc);
     rendering_context_render_tri_face(rc, back_verts, sizeof(back_verts) / sizeof(float));
