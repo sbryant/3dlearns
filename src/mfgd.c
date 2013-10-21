@@ -76,6 +76,9 @@ int main(int argc, char** argv) {
              version,
              glsl_ver );
 
+    memset(&box, 0, sizeof(character));
+    box.gravity.y = -4.0f;
+
     GLuint vao;
     glGenVertexArrays( 1, &vao );
     glBindVertexArray( vao );
