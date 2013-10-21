@@ -110,6 +110,8 @@ void rendering_context_set_view(rendering_context *r, const mat4x4 *m) {
 }
 
 void renderer_start_rendering(renderer *rndr, rendering_context *rc) {
+    assert(application != NULL);
+
     rndr->width = application->w;
     rndr->height = application->h;
 
