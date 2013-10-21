@@ -10,6 +10,13 @@ renderer* make_renderer(int w, int h) {
     r->camera_dir = vec3_make();
     r->camera_up  = vec3_make();
 
+    glGenBuffers(1, &(r->vbo));
+    glBindBuffer(GL_ARRAY_BUFFER, r->vbo);
+
+    /* XYZ float attributes */
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12, NULL, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     return r;
 }
 
@@ -75,15 +82,11 @@ rendering_context* make_rendering_context(renderer* rndr) {
     r->num_render_contexts = 1;
 
     r->shader = rndr->shader;
+    r->program = r->shader->program;
+    r->vbo = rndr->vbo;
 
     r->renderer = rndr;
 
-    glGenBuffers(1, &(r->vbo));
-    glBindBuffer(GL_ARRAY_BUFFER, r->vbo);
-
-    /* enough floats for 6 x 6 of XYZ float attributes */
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12 * 3, NULL, GL_STATIC_DRAW);
-    glBindBuffer(GL_STATIC_DRAW, 0);
 
     return r;
 }
@@ -137,10 +140,10 @@ void rendering_context_end_render(rendering_context *r) {
     rendering_context_set_uniform_mat4x4(r, "model", context->model);
 
     glBindBuffer(GL_ARRAY_BUFFER, r->vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * r->num_verts, (const GLvoid *)(r->verts));
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * r->num_verts, r->verts);
 
     glEnableVertexAttribArray(r->shader->pos_attr);
-    glVertexAttribPointer(r->shader->pos_attr, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), 0);
+    glVertexAttribPointer(r->shader->pos_attr, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     glDrawArrays(r->draw_mode, 0, r->num_verts);
     glDisableVertexAttribArray(r->shader->pos_attr);
