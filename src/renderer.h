@@ -13,8 +13,6 @@ typedef struct s_app {
     int h;
 } app;
 
-static app* application;
-
 typedef struct s_renderer {
     int height, width;
     vec3 *camera_pos;
