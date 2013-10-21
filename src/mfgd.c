@@ -230,8 +230,10 @@ int main(int argc, char** argv) {
         }
 
         float dt = now - old;
+
         if (dt > 0.15f)
-             dt = 0.15f;
+            dt = 0.15f;
+
         update(dt);
         draw(r);
         SDL_GL_SwapWindow(screen);
