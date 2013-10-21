@@ -8,7 +8,14 @@
 #include "renderer.h"
 #include "shader.h"
 
+typedef struct s_character {
+    vec3 pos;
+    vec3 velocity;
+    vec3 velocity_goal;
+    vec3 gravity;
+} character;
 
+character box;
 
 
 
