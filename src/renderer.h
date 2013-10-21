@@ -1,5 +1,6 @@
 #pragma once
 #include <stdlib.h> /* size_t */
+#include <assert.h>
 
 #include "vector.h"
 #include "matrix.h"
