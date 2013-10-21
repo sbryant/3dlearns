@@ -96,7 +96,7 @@ mat4x4* rendering_context_projection(rendering_context *r) {
 }
 
 mat4x4* rendering_context_view(rendering_context *r) {
-    return r->context->proj;
+    return r->context->view;
 }
 
 void rendering_context_set_projection(rendering_context *r, const mat4x4 *m) {
