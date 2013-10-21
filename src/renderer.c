@@ -120,10 +120,10 @@ void renderer_start_rendering(renderer *rndr, rendering_context *rc) {
 
     float aspect = rndr->width/(float)rndr->height;
 
-    mat4x4 *proj = perspective(rndr->camera_fov, aspect, rndr->camera_near, rndr->camera_far);
+    mat4x4 *proj = mat4x4_perspective(rndr->camera_fov, aspect, rndr->camera_near, rndr->camera_far);
     rendering_context_set_projection(rc, proj);
 
-    mat4x4 *view = look_at(rndr->camera_pos, rndr->camera_dir, rndr->camera_up);
+    mat4x4 *view = mat4x4_look_at(rndr->camera_pos, rndr->camera_dir, rndr->camera_up);
     rendering_context_set_view(rc, view);
 
     mat4x4_cleanup(view); mat4x4_cleanup(proj);
