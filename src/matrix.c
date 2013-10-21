@@ -31,6 +31,12 @@ mat4x4 *mat4x4_translate(mat4x4* m, float x, float y, float z) {
     return res;
 }
 
+void mat4x4_scale(mat4x4* m, float x, float y, float z) {
+    m->x[0] = x * m->x[0];
+    m->y[1] = y * m->y[1];
+    m->z[2] = z * m->z[2];
+}
+
 mat4x4 *mat4x4_mul(mat4x4* const m, mat4x4* const m2) {
     mat4x4 *r = mat4x4_make_ident(NULL);
 
