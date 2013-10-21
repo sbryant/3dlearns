@@ -92,10 +92,10 @@ vec3 *vec3_mul_scalar(vec3* const v, float const s) {
 vec4 *vec4_div_scalar(vec4* const v, float const s) {
     vec4* v2 = vec4_make();
 
-    v2->x = v->x / s;
-    v2->y = v->y / s ;
-    v2->z = v->z / s;
-    v2->w = v->w / s;
+    v2->x = s / v->x ;
+    v2->y = s / v->y;
+    v2->z = s / v->z;
+    v2->w = s / v->w;
 
     return v2;
 }
@@ -136,6 +136,10 @@ float vec4_dot(vec4* const a, vec4* const b) {
     return (a->x * b->x) + (a->y * b->y) + (a->z * b->z) + (a->w * b->w);
 }
 
+float vec3_dot(vec3* const a, vec3* const b) {
+    return (a->x * b->x) + (a->y * b->y) + (a->z * b->z);
+}
+
 vec4* vec4_cross(vec4* const a, vec4* const b) {
     vec4 *v  = vec4_make();
     v->x = (a->y * b->z) - (b->y * a->z);
@@ -148,9 +152,9 @@ vec4* vec4_cross(vec4* const a, vec4* const b) {
 
 vec3* vec3_cross(vec3* const a, vec3* const b) {
     vec3 *v  = vec3_make();
-    v->x = (a->y * b->z) - (b->y * a->z);
-    v->y = (a->z * b->x) - (b->z * a->x);
-    v->z = (a->x * b->y) - (b->x * a->y);
+    v->x = (a->y * b->z) - (a->z * b->y);
+    v->y = (a->z * b->x) - (a->x * b->z);
+    v->z = (a->x * b->y) - (a->y * b->x);
 
     return v;
 }
