@@ -21,7 +21,7 @@ typedef struct s_renderer {
     float camera_fov, camera_near, camera_far;
 
     shader *shader;
-
+    unsigned int vbo;
 } renderer;
 
 
