@@ -75,6 +75,8 @@ render_context* make_render_context(void) {
 }
 
 rendering_context* make_rendering_context(renderer* rndr) {
+    assert(application != NULL);
+
     rendering_context* r = (rendering_context*)calloc(1, sizeof(rendering_context));
     render_context* rc = make_render_context();
 
@@ -86,6 +88,10 @@ rendering_context* make_rendering_context(renderer* rndr) {
 
     r->renderer = rndr;
 
+    r->context->viewport_width = application->w;
+    r->context->viewport_height = application->h;
+    r->context->viewport_x = 0;
+    r->context->viewport_y = 0;
 
     return r;
 }
