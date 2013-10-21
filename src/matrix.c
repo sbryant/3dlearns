@@ -24,7 +24,7 @@ mat4x4 *mat4x4_translate(mat4x4* m, float x, float y, float z) {
     r->w[1] = y;
     r->w[2] = z;
 
-    mat4x4* res = mat4x4_mul(r, m);
+    mat4x4* res = mat4x4_mul(m, r);
 
     mat4x4_cleanup(r);
 
