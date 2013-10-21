@@ -181,16 +181,22 @@ int main(int argc, char** argv) {
     int tick = 1000;
 
     glEnable(GL_DEPTH_TEST);
-
+    uint32_t now = SDL_GetTicks();
+    int pause = 0;
     while(true) {
         SDL_Event event;
         int quit = 0;
 
+
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_KEYDOWN:
+                if (event.key.keysym.sym == SDLK_SPACE)
+                    pause = 1;
                 break;
             case SDL_KEYUP:
+                if (event.key.keysym.sym == SDLK_SPACE)
+                    pause = 0;
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     quit = 1;
                 break;
@@ -203,7 +209,10 @@ int main(int argc, char** argv) {
         if (quit == 1) // if received instruction to quit
             break;
 
-        uint32_t now = SDL_GetTicks();
+
+        if (!pause)
+            now = SDL_GetTicks();
+
         glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
