@@ -72,6 +72,7 @@ rendering_context* make_rendering_context(renderer* rndr);
 void rendering_context_set_projection(rendering_context *r, const mat4x4 *m);
 void rendering_context_set_view(rendering_context *r, const mat4x4 *m);
 void renderer_start_rendering(renderer *rndr, rendering_context *rc);
+void renderer_finish_rendering(renderer *rndr, rendering_context *rc);
 void rendering_context_render_box(rendering_context* rc, vec3 *min, vec3 *max);
 void rendering_context_set_uniform_vec4(rendering_context* rc, const char* name, vec4 *v);
 void rendering_context_set_uniform_mat4x4(rendering_context* rc, const char* name, mat4x4 *m);

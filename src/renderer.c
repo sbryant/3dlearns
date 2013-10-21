@@ -132,9 +132,10 @@ void renderer_start_rendering(renderer *rndr, rendering_context *rc) {
     glEnable(GL_MULTISAMPLE);
 }
 
-void rendering_context_end_render(rendering_context *r) {
-    glUseProgram(r->shader->program);
+void renderer_finish_rendering(renderer *rndr, rendering_context *rc) {
+}
 
+void rendering_context_end_render(rendering_context *r) {
     render_context *context = r->context;
     rendering_context_set_uniform_mat4x4(r, "proj", context->proj);
     rendering_context_set_uniform_mat4x4(r, "view", context->view);
