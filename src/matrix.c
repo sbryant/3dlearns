@@ -93,7 +93,7 @@ float* mat4x4_make_array(mat4x4* const m) {
 
 void mat4x4_print(mat4x4* m) {
     for(int i = 0; i < 4; i++) {
-        printf("x[%d]:%.2f y[%d]:%.2f z[%d]%.2f w[%d]%.2f\n",
+        printf("x[%d]:%.6f y[%d]:%.6f z[%d]%.6f w[%d]%.6f\n",
                i, m->x[i],
                i, m->y[i],
                i, m->z[i],
