@@ -204,7 +204,7 @@ int main(int argc, char** argv) {
                 if (event.key.keysym.sym == SDLK_d)
                     box.velocity_goal.x = -15.0f;
                 if (event.key.keysym.sym == SDLK_SPACE)
-                    box.velocity.y = 5.0f;
+                    box.velocity.y = 2.0f;
                 break;
             case SDL_KEYUP:
                 if (event.key.keysym.sym == SDLK_p)
