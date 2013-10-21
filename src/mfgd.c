@@ -13,6 +13,15 @@
 
 int main(int argc, char** argv) {
     SDL_Init(SDL_INIT_VIDEO);
+    SDL_DisplayMode info;
+
+    SDL_GetCurrentDisplayMode(0, &info);
+
+    application = (app*)malloc(sizeof(app));
+    application->w = info.w;
+    application->h = info.h;
+
+    printf("w %d, h %d\n", application->w, application->h);
 
     /* Setup OpenGL 3.2 Context For OS X */
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -21,13 +30,14 @@ int main(int argc, char** argv) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,8);
 
     /* Create a fullscreen window */
     SDL_Window *screen = SDL_CreateWindow("MFGD",
-                                          SDL_WINDOWPOS_UNDEFINED,
-                                          SDL_WINDOWPOS_UNDEFINED,
-                                          0, 0,
-                                          SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL);
+                                          SDL_WINDOWPOS_CENTERED,
+                                          SDL_WINDOWPOS_CENTERED,
+                                          800, 600,
+                                          SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
 
     /* initialize a render context, managed by SDL */
     SDL_GLContext *opengl3_context = SDL_GL_CreateContext(screen);
