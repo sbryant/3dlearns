@@ -213,7 +213,9 @@ int main(int argc, char** argv) {
         glUniformMatrix4fv(uniView, 1, GL_FALSE, view->m);
         glUniformMatrix4fv(uniProj, 1, GL_FALSE, proj->m);
 
-        mat4x4 *model = mat4x4_rotate(ident, now / (float)tick * 180.0f, &up);
+        float rotate = now / (float)tick * 180.0f;
+        rotate = rotate * PI / 180.0f;
+        mat4x4 *model = mat4x4_rotate(ident, rotate, &up);
         glUniformMatrix4fv(uniModel, 1, GL_FALSE, model->m);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
