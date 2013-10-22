@@ -15,8 +15,7 @@ renderer* make_renderer(int w, int h) {
     glGenBuffers(1, &(r->vbo));
     glBindBuffer(GL_ARRAY_BUFFER, r->vbo);
 
-    /* XYZ float attributes */
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12, NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 1024, NULL, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     return r;
