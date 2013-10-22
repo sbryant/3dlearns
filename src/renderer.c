@@ -142,14 +142,19 @@ void rendering_context_end_render(rendering_context *r) {
     rendering_context_set_uniform_mat4x4(r, "model", context->model);
 
     glBindBuffer(GL_ARRAY_BUFFER, r->vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * r->num_verts, r->verts);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * r->num_verts * 6, r->verts);
 
     glEnableVertexAttribArray(r->shader->pos_attr);
-    glVertexAttribPointer(r->shader->pos_attr, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(r->shader->pos_attr, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
 
+    glEnableVertexAttribArray(r->shader->color_attr);
+    glVertexAttribPointer(r->shader->color_attr, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
+    printf("r->num_verts %d\n", r->num_verts);
     glDrawArrays(r->draw_mode, 0, r->num_verts);
+
     glDisableVertexAttribArray(r->shader->pos_attr);
     glDisableVertexAttribArray(r->shader->color_attr);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void rendering_context_begin_render_tri_fan(rendering_context *r) {
@@ -178,74 +183,74 @@ void rendering_context_render_box(rendering_context* rc, vec3 *min, vec3 *max) {
 
     float back_verts[] = {
         /* back face */
-        min->x, min->y, min->z,  /* lower left */
-        mr->x, mr->y, mr->z, /* lower right */
-        mru->x, mru->y, mru->z, /* top right */
-        mu->x, mu->y, mu->z /* top left */
+        min->x, min->y, min->z, 1.0, 0.0, 0.0,
+        mr->x, mr->y, mr->z, 0.0, 1.0, 0.0,
+        mru->x, mru->y, mru->z, 1.0, 0.0, 1.0,
+        mu->x, mu->y, mu->z, 1.0, 1.0, 0.0
     };
 
     float left_verts[] = {
         /* left face */
-        min->x, min->y, min->z,
-        mu->x, mu->y, mu->z,
-        muf->x, muf->y, muf->z,
-        mf->x, mf->y, mf->z
+        min->x, min->y, min->z, 1.0, 0.0, 0.0,
+        mu->x, mu->y, mu->z, 0.0, 1.0, 0.0,
+        muf->x, muf->y, muf->z, 1.0, 0.0, 1.0,
+        mf->x, mf->y, mf->z, 1.0, 1.0, 0.0
     };
 
     float bottom_verts[] = {
         /* bottom face */
-        min->x, min->y, min->z,
-        mf->x, mf->y, mf->z,
-        mfr->x, mfr->y, mfr->z,
-        mr->x, mr->y, mr->z
+        min->x, min->y, min->z, 1.0, 0.0, 0.0,
+        mf->x, mf->y, mf->z, 0.0, 1.0, 0.0,
+        mfr->x, mfr->y, mfr->z, 1.0, 0.0, 1.0,
+        mr->x, mr->y, mr->z, 1.0, 1.0, 0.0
     };
 
     float top_verts[] = {
         /* top face */
-        mruf->x, mruf->y, mruf->z,
-        muf->x, muf->y, muf->z,
-        mu->x, mu->y, mu->z,
-        mru->x, mru->y, mru->z
+        mruf->x, mruf->y, mruf->z, 1.0, 0.0, 0.0,
+        muf->x, muf->y, muf->z, 0.0, 1.0, 0.0,
+        mu->x, mu->y, mu->z, 1.0, 0.0, 1.0,
+        mru->x, mru->y, mru->z, 1.0, 1.0, 0.0
     };
 
     float right_verts[] = {
         /* right face */
-        mruf->x, mruf->y, mruf->z,
-        mru->x, mru->y, mru->z,
-        mr->x, mr->y, mr->z,
-        mfr->x, mfr->y, mfr->z
+        mruf->x, mruf->y, mruf->z, 1.0, 0.0, 0.0,
+        mru->x, mru->y, mru->z, 0.0, 1.0, 0.0,
+        mr->x, mr->y, mr->z, 1.0, 0.0, 1.0,
+        mfr->x, mfr->y, mfr->z, 1.0, 1.0, 0.0
     };
 
     float front_verts[] = {
         /* front face */
-        mruf->x, mruf->y, mruf->z,
-        mfr->x, mfr->y, mfr->z,
-        mf->x, mf->y, mf->z,
-        mfu->x, mfu->y, mfu->z
+        mruf->x, mruf->y, mruf->z, 1.0, 0.0, 0.0,
+        mfr->x, mfr->y, mfr->z, 0.0, 1.0, 0.0,
+        mf->x, mf->y, mf->z, 1.0, 0.0, 0.0,
+        mfu->x, mfu->y, mfu->z, 1.0, 1.0, 0.0
     };
 
     rendering_context_begin_render_tri_fan(rc);
-    rendering_context_render_tri_face(rc, back_verts, sizeof(back_verts) / sizeof(float));
+    rendering_context_render_tri_face(rc, back_verts, sizeof(back_verts) / sizeof(float) / 6.0);
     rendering_context_end_render(rc);
 
     rendering_context_begin_render_tri_fan(rc);
-    rendering_context_render_tri_face(rc, left_verts, sizeof(left_verts) / sizeof(float));
+    rendering_context_render_tri_face(rc, left_verts, sizeof(left_verts) / sizeof(float) / 6.0);
     rendering_context_end_render(rc);
 
     rendering_context_begin_render_tri_fan(rc);
-    rendering_context_render_tri_face(rc, bottom_verts, sizeof(bottom_verts) / sizeof(float));
+    rendering_context_render_tri_face(rc, bottom_verts, sizeof(bottom_verts) / sizeof(float) / 6.0);
     rendering_context_end_render(rc);
 
     rendering_context_begin_render_tri_fan(rc);
-    rendering_context_render_tri_face(rc, top_verts, sizeof(top_verts) / sizeof(float));
+    rendering_context_render_tri_face(rc, top_verts, sizeof(top_verts) / sizeof(float) / 6.0);
     rendering_context_end_render(rc);
 
     rendering_context_begin_render_tri_fan(rc);
-    rendering_context_render_tri_face(rc, right_verts, sizeof(right_verts) / sizeof(float));
+    rendering_context_render_tri_face(rc, right_verts, sizeof(right_verts) / sizeof(float) / 6.0);
     rendering_context_end_render(rc);
 
     rendering_context_begin_render_tri_fan(rc);
-    rendering_context_render_tri_face(rc, front_verts, sizeof(front_verts) / sizeof(float));
+    rendering_context_render_tri_face(rc, front_verts, sizeof(front_verts) / sizeof(float) / 6.0);
     rendering_context_end_render(rc);
 
 }
