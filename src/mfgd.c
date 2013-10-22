@@ -197,20 +197,21 @@ int main(int argc, char** argv) {
     while(true) {
         SDL_Event event;
         int quit = 0;
+        int w_down, a_down, s_down, d_down = 0;
 
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_KEYDOWN:
                 if (event.key.keysym.sym == SDLK_p)
                     pause = 1;
-                if (event.key.keysym.sym == SDLK_a)
-                    box.velocity_goal.x = 15.0f;
                 if (event.key.keysym.sym == SDLK_w)
-                    box.velocity_goal.z = 15.0f;
+                    w_down = 1;
+                if (event.key.keysym.sym == SDLK_a)
+                    a_down = 1;
                 if (event.key.keysym.sym == SDLK_s)
-                    box.velocity_goal.z = -15.0f;
+                    s_down = 1;
                 if (event.key.keysym.sym == SDLK_d)
-                    box.velocity_goal.x = -15.0f;
+                    d_down = 1;
                 if (event.key.keysym.sym == SDLK_SPACE)
                     box.velocity.y = 2.0f;
                 break;
@@ -219,20 +220,32 @@ int main(int argc, char** argv) {
                     pause = 0;
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     quit = 1;
-                if (event.key.keysym.sym == SDLK_a)
-                    box.velocity_goal.x = 0.0f;
                 if (event.key.keysym.sym == SDLK_w)
-                    box.velocity_goal.z = 0.0f;
+                    w_down = 0; box.velocity_goal.z = 0.0f;
+                if (event.key.keysym.sym == SDLK_a)
+                    a_down = 0; box.velocity_goal.x = 0.0f;
                 if (event.key.keysym.sym == SDLK_s)
-                    box.velocity_goal.z = 0.0f;
+                    s_down = 0; box.velocity_goal.z = 0.0f;
                 if (event.key.keysym.sym == SDLK_d)
-                    box.velocity_goal.x = 0.0f;
+                    d_down = 0; box.velocity_goal.x = 0.0;
+                if (event.key.keysym.sym == SDLK_r)
+                    box.pos.x = box.pos.y = box.pos.z = 0.0f;
+
                 break;
             case SDL_QUIT:
                 quit = 1;
                 break;
             }
         }
+
+        if (w_down)
+            box.velocity_goal.z = 15.0f;
+        if (a_down)
+            box.velocity_goal.x = 15.0f;
+        if (s_down)
+            box.velocity_goal.z = -15.0f;
+        if (d_down)
+            box.velocity_goal.x = -15.0f;
 
         if (quit == 1) // if received instruction to quit
             break;
