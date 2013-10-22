@@ -21,34 +21,35 @@ void update(float dt) {
     box.velocity.x = approach(box.velocity_goal.x, box.velocity.x, dt * 65.0f);
     box.velocity.z = approach(box.velocity_goal.z, box.velocity.z, dt * 65.0f);
 
-    vec3 *new_vel = vec3_mul_scalar(&(box.velocity), dt);
-    vec3 *new_pos = vec3_add(&(box.pos), new_vel);
+    vec3 *temp_vel = vec3_mul_scalar(&(box.velocity), dt);
+    vec3 *new_pos = vec3_add(&(box.pos), temp_vel);
 
     vec3_set_vec3(&(box.pos), new_pos);
-    free(new_vel); free(new_pos);
+    free(temp_vel); free(new_pos);
 
-    new_vel = NULL;
+    vec3 *temp_grav = vec3_mul_scalar(&(box.gravity), dt);
+    vec3 *new_vel = vec3_add(&(box.velocity), temp_grav);
 
-    vec3 *new_grav = vec3_mul_scalar(&(box.gravity), dt);
-    new_vel = vec3_add(&(box.velocity), new_grav);
     vec3_set_vec3(&(box.velocity), new_vel);
-    free(new_grav); free(new_vel);
+    free(new_vel); free(temp_grav);
 
-    if (box.pos.y < 0)
+    if (box.pos.y < 0.0f) {
         box.pos.y = 0.0f;
+        box.velocity.y = 0.0f;
+    }
+
 }
 
 void draw(renderer *rndr) {
     vec3 shift = { 0.0, 4.0, -6.0 };
     vec3 *camera_pos = vec3_add(&(box.pos), &shift);
     renderer_set_camera_position(rndr, camera_pos);
-    free(camera_pos);
 
     vec3 *temp_pos = vec3_sub(&(box.pos), renderer_camera_position(rndr));
     vec3 *new_dir = vec3_normalize(temp_pos);
 
     renderer_set_camera_dir(rndr, new_dir);
-    free(temp_pos); free(new_dir);
+    free(temp_pos);
 
     vec3 up = { 0.0, 1.0, 0.0 };
     renderer_set_camera_up(rndr, &up);
@@ -70,11 +71,12 @@ void draw(renderer *rndr) {
 
     vec3 player_shift_min = { 0.5f, 0.0f, 0.5f };
     vec3 player_shift_max = { 0.5f, 2.0f, 0.5f };
-    vec3 pos = box.pos;
-    vec3 *player_pos_min = vec3_sub(&pos, &player_shift_min);
-    vec3 *player_pos_max = vec3_add(&pos, &player_shift_max);
+    vec3 *pos = &box.pos;
+    vec3 *player_pos_min = vec3_sub(pos, &player_shift_min);
+    vec3 *player_pos_max = vec3_add(pos, &player_shift_max);
 
     rendering_context_render_box(rc, player_pos_min, player_pos_max);
+
 
     vec4 color2 = { 0.3, 0.9, 0.5, 1.0 };
     vec3 box_temp_pos = { 6.0f, 0.0f, 4.0f };
@@ -89,18 +91,24 @@ void draw(renderer *rndr) {
     static vec4 color3 = { 0.6, 0.7, 0.9, 1.0 };
 
     static float verts[] = {
-        -30.0, 0.0, -30.0,
-        -30.0, 0.0, 30.0,
-        30.0, 0.0, 30.0,
-        30.0, 0.0, -30.0
+        -30.0, 0.0, -30.0, 1.0, 1.0, 1.0,
+        -30.0, 0.0,  30.0, 1.0, 1.0, 1.0,
+        30.0, 0.0,  30.0, 1.0, 1.0, 1.0,
+        30.0, 0.0, -30.0, 1.0, 1.0, 1.0
     };
 
     rendering_context_set_uniform_vec4(rc, "vecColor", &color3);
     rendering_context_begin_render_tri_fan(rc);
-    rendering_context_render_tri_face(rc, verts, sizeof(verts) / sizeof(float));
+    rendering_context_render_tri_face(rc, verts, sizeof(verts) / sizeof(float) / 6.0);
     rendering_context_end_render(rc);
 
     renderer_finish_rendering(rndr, rc);
+
+    free(box_pos_max);
+    free(box_pos_min);
+
+    free(player_pos_max);
+    free(player_pos_min);
 }
 
 int main(int argc, char** argv) {
