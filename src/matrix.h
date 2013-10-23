@@ -30,3 +30,5 @@ void mat4x4_set_mat4x4(mat4x4 *m1, const mat4x4 *m2);
 void mat4x4_scale(mat4x4* m, float x, float y, float z);
 mat4x4* mat4x4_look_at(vec3 *pos, vec3 *center, vec3 *up);
 mat4x4* mat4x4_perspective(const float fovy, const float aspect, const float znear, const float zfar);
+mat4x4* mat4x4_camera_view(vec3 *pos, vec3 *dir, vec3 *up);
+mat4x4* mat4x4_inverted_tr(mat4x4 *m);

@@ -211,3 +211,58 @@ mat4x4* mat4x4_perspective(const float fovy, const float aspect, const float zne
 
     return res;
 }
+
+mat4x4* mat4x4_inverted_tr(mat4x4 *m) {
+    mat4x4 *r = mat4x4_make_ident(NULL);
+
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3; j++) {
+            r->m[(i*4) + j] = m->m[(j*4) + i];
+        }
+    }
+
+    vec4 old_trans = { m->w[0], m->w[1], m->w[2], m->w[3] };
+    vec4 *new_trans = mat4x4_mul_vec4(r, &old_trans);
+
+    r->w[0] = -new_trans->x;
+    r->w[1] = -new_trans->y;
+    r->w[2] = -new_trans->z;
+    r->w[3] = 1.0f;
+
+    free(new_trans);
+
+    return r;
+}
+
+mat4x4* mat4x4_camera_view(vec3 *pos, vec3 *dir, vec3 *up) {
+    vec3 *du = vec3_cross(dir, up);
+    vec3 *cam_right = vec3_normalize(du);
+
+    vec3 *cam_up = vec3_cross(cam_right, dir);
+
+    mat4x4 *r = mat4x4_make_ident(NULL);
+
+    r->x[0] = cam_right->x;
+    r->x[1] = cam_right->y;
+    r->x[2] = cam_right->z;
+
+    r->y[0] = cam_up->x;
+    r->y[1] = cam_up->y;
+    r->y[2] = cam_up->z;
+
+    r->z[0] = -dir->x;
+    r->z[1] = -dir->y;
+    r->z[2] = -dir->z;
+
+    r->w[0] = pos->x;
+    r->w[1] = pos->y;
+    r->w[2] = pos->z;
+
+    mat4x4 *ret = mat4x4_inverted_tr(r);
+    mat4x4_cleanup(r);
+    free(cam_up);
+    free(cam_right);
+    free(du);
+
+    return ret;
+}
