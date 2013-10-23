@@ -77,7 +77,6 @@ void draw(renderer *rndr) {
 
     rendering_context_render_box(rc, player_pos_min, player_pos_max);
 
-
     vec4 color2 = { 0.3, 0.9, 0.5, 1.0 };
     vec3 box_temp_pos = { 6.0f, 0.0f, 4.0f };
     vec3 box_shift_min = { 0.5f, 0.0f, 0.5f };
