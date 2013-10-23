@@ -57,9 +57,27 @@ typedef struct s_character {
     vec3 velocity;
     vec3 velocity_goal;
     vec3 gravity;
+    euler view_angle;
+    int mouse_x;
+    int mouse_y;
 } character;
 
 character box;
+
+void mouse_move(character *c, int x, int y) {
+    int mouse_x = x - c->mouse_x;
+    int mouse_y = y - c->mouse_y;
+
+    float sensitivity = 0.01f;
+
+    c->view_angle.p += mouse_y * sensitivity;
+    c->view_angle.y += mouse_x * sensitivity;
+
+    euler_normalize(&c->view_angle, &c->view_angle);
+
+    c->mouse_x = x;
+    c->mouse_y = y;
+}
 
 void update(float dt) {
     box.velocity.x = approach(box.velocity_goal.x, box.velocity.x, dt * 65.0f);
@@ -85,8 +103,13 @@ void update(float dt) {
 }
 
 void draw(renderer *rndr) {
-    vec3 shift = { 0.0, 4.0, -6.0 };
-    vec3 *camera_pos = vec3_add(&(box.pos), &shift);
+    vec3 ang;
+    euler_make_vector(&box.view_angle, &ang);
+    ang.x *= 5;
+    ang.y *= 5;
+    ang.z *= 5;
+    vec3 *camera_pos = vec3_sub(&(box.pos), &ang);
+
     renderer_set_camera_position(rndr, camera_pos);
 
     vec3 *temp_pos = vec3_sub(&(box.pos), renderer_camera_position(rndr));
@@ -273,7 +296,9 @@ int main(int argc, char** argv) {
                     d_down = 0; box.velocity_goal.x = 0.0;
                 if (event.key.keysym.sym == SDLK_r)
                     box.pos.x = box.pos.y = box.pos.z = 0.0f;
-
+                break;
+            case SDL_MOUSEMOTION:
+                mouse_move(&box, event.motion.x, event.motion.y);
                 break;
             case SDL_QUIT:
                 quit = 1;
