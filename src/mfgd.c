@@ -8,6 +8,50 @@
 #include "renderer.h"
 #include "shader.h"
 
+typedef struct s_euler {
+    float p;
+    float y;
+    float r;
+} euler;
+
+euler *make_euler(void) {
+    return (euler *)calloc(1, sizeof(euler));
+}
+
+euler *euler_normalize(euler *angle, euler *out) {
+    euler *result = out;
+
+    if (result == NULL)
+        result = make_euler();
+
+    if (angle->p > 89.0f)
+        result->p = 89.0f;
+    if (angle->p < -89.0f)
+        result->p = -89.0f;
+
+    result->y = angle->y;
+
+    while (result->y < -180.0f)
+        result->y += 360.0f;
+    while (result->y > 180.0f)
+        result->y -= 360.0f;
+
+    return result;
+}
+
+vec3 *euler_make_vector(euler *angle, vec3 *out) {
+    vec3 *r = out;
+
+    if (r == NULL)
+        r = vec3_make();
+
+    r->x = cosf(angle->y) * cosf(angle->p);
+    r->y = sinf(angle->p);
+    r->z = sinf(angle->y) * cosf(angle->p);
+
+    return r;
+}
+
 typedef struct s_character {
     vec3 pos;
     vec3 velocity;
