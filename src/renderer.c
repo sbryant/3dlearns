@@ -149,7 +149,6 @@ void rendering_context_end_render(rendering_context *r) {
 
     glEnableVertexAttribArray(r->shader->color_attr);
     glVertexAttribPointer(r->shader->color_attr, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
-    printf("r->num_verts %d\n", r->num_verts);
     glDrawArrays(r->draw_mode, 0, r->num_verts);
 
     glDisableVertexAttribArray(r->shader->pos_attr);
