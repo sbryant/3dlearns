@@ -11,7 +11,7 @@ float vec4_length(vec4* const v) {
                  (v->w * v->w));
 }
 
-float vec3_length(vec3* const v) {
+float vec3_length(const vec3* v) {
     return sqrtf((v->x * v->x) +
                  (v->y * v->y) +
                  (v->z * v->z));
@@ -35,8 +35,10 @@ vec4* vec4_add(vec4* const v1, vec4* const v2) {
     return vr;
 }
 
-vec3* vec3_add(vec3* const v1, vec3* const v2) {
-    vec3 *vr = vec3_make();
+vec3* vec3_add(const vec3 *v1, const vec3 *v2, vec3 *out) {
+    vec3 *vr = out;
+    if (vr == NULL)
+        vr = vec3_make();
 
     vr->x = v1->x + v2->x;
     vr->y = v1->y + v2->y;
@@ -56,8 +58,10 @@ vec4* vec4_sub(vec4* const v1, vec4* const v2) {
     return vr;
 }
 
-vec3* vec3_sub(vec3* const v1, vec3* const v2) {
-    vec3 *vr = vec3_make();
+vec3* vec3_sub(const vec3 *v1, const vec3 *v2, vec3 *out) {
+    vec3 *vr = out;
+    if (vr == NULL)
+        vr = vec3_make();
 
     vr->x = v1->x - v2->x;
     vr->y = v1->y - v2->y;
@@ -79,8 +83,10 @@ vec4 *vec4_mul_scalar(vec4* const v, float const s) {
     return v2;
 }
 
-vec3 *vec3_mul_scalar(vec3* const v, float const s) {
-    vec3* v2 = vec3_make();
+vec3 *vec3_mul_scalar(const vec3* v, const float s, vec3 *out) {
+    vec3* v2 = out;
+    if (v2 == NULL)
+        v2 = vec3_make();
 
     v2->x = v->x * s;
     v2->y = v->y * s;
@@ -121,8 +127,11 @@ vec4 *vec4_normalize(vec4* const v) {
     return v2;
 }
 
-vec3 *vec3_normalize(vec3* const v) {
-    vec3 *v2  = vec3_make();
+vec3 *vec3_normalize(const vec3 *v, vec3 *out) {
+    vec3 *v2  = out;
+    if (v2 == NULL)
+        v2 = vec3_make();
+
     float v_len = vec3_length(v);
 
     v2->x = v->x / v_len;
@@ -150,8 +159,11 @@ vec4* vec4_cross(vec4* const a, vec4* const b) {
     return v;
 }
 
-vec3* vec3_cross(vec3* const a, vec3* const b) {
-    vec3 *v  = vec3_make();
+vec3* vec3_cross(const vec3* a, const vec3* b, vec3 *out) {
+    vec3 *v  = out;
+    if (v == NULL)
+        v = vec3_make();
+
     v->x = (a->y * b->z) - (a->z * b->y);
     v->y = (a->z * b->x) - (a->x * b->z);
     v->z = (a->x * b->y) - (a->y * b->x);
