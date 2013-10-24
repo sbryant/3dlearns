@@ -54,12 +54,14 @@ vec3 *euler_make_vector(euler *angle, vec3 *out) {
 
 typedef struct s_character {
     vec3 pos;
+    vec3 movement;
+    vec3 movement_goal;
     vec3 velocity;
-    vec3 velocity_goal;
     vec3 gravity;
     euler view_angle;
     int mouse_x;
     int mouse_y;
+    float speed;
 } character;
 
 character box;
@@ -80,24 +82,35 @@ void mouse_move(character *c, int x, int y) {
 }
 
 void update(float dt) {
-    box.velocity.x = approach(box.velocity_goal.x, box.velocity.x, dt * 65.0f);
-    box.velocity.z = approach(box.velocity_goal.z, box.velocity.z, dt * 65.0f);
+    box.movement.x = approach(box.movement_goal.x, box.movement.x, dt * 65.0f);
+    box.movement.z = approach(box.movement_goal.z, box.movement.z, dt * 65.0f);
 
-    vec3 *temp_vel = vec3_mul_scalar(&(box.velocity), dt);
-    vec3 *new_pos = vec3_add(&(box.pos), temp_vel);
+    vec3 forward = { 0.0f, 0.0f, 0.0f };
+    euler_make_vector(&box.view_angle, &forward);
+    forward.y = 0.0f;
+    vec3_normalize(&forward, &forward);
 
-    vec3_set_vec3(&(box.pos), new_pos);
-    free(temp_vel); free(new_pos);
+    vec3 up = { 0.0f, 1.0f, 0.0f };
+    vec3 right = { 0.0f, 0.0f, 0.0f };
+    vec3_cross(&up, &forward, &right);
 
-    vec3 *temp_grav = vec3_mul_scalar(&(box.gravity), dt);
-    vec3 *new_vel = vec3_add(&(box.velocity), temp_grav);
+    vec3 f_vel = { 0.0, 0.0, 0.0 };
+    vec3 r_vel = { 0.0, 0.0, 0.0 };
+    vec3_mul_scalar(&forward, box.movement.x, &f_vel);
+    vec3_mul_scalar(&right, box.movement.z, &r_vel);
 
-    vec3_set_vec3(&(box.velocity), new_vel);
-    free(new_vel); free(temp_grav);
+    vec3_add(&f_vel, &r_vel, &box.velocity);
+
+    vec3 new_pos = { 0.0, 0.0, 0.0 };
+    vec3_mul_scalar(&box.velocity, dt, &new_pos);
+    vec3_add(&box.pos, &new_pos, &box.pos);
+
+    vec3 new_vel = { 0.0, 0.0, 0.0 };
+    vec3_mul_scalar(&(box.gravity), dt, &new_vel);
+    vec3_add(&(box.velocity), &new_vel, &box.velocity);
 
     if (box.pos.y < 0.0f) {
         box.pos.y = 0.0f;
-        box.velocity.y = 0.0f;
     }
 
 }
@@ -108,15 +121,16 @@ void draw(renderer *rndr) {
     ang.x *= 5;
     ang.y *= 5;
     ang.z *= 5;
-    vec3 *camera_pos = vec3_sub(&(box.pos), &ang);
+    vec3 camera_pos = { 0.0, 0.0, 0.0 };
+    vec3_sub(&(box.pos), &ang, &camera_pos);
 
-    renderer_set_camera_position(rndr, camera_pos);
+    renderer_set_camera_position(rndr, &camera_pos);
 
-    vec3 *temp_pos = vec3_sub(&(box.pos), renderer_camera_position(rndr));
-    vec3 *new_dir = vec3_normalize(temp_pos);
+    vec3 new_dir = { 0.0, 0.0, 0.0 };
+    vec3_sub(&(box.pos), renderer_camera_position(rndr), &new_dir);
+    vec3_normalize(&new_dir, &new_dir);
 
-    renderer_set_camera_dir(rndr, new_dir);
-    free(temp_pos);
+    renderer_set_camera_dir(rndr, &new_dir);
 
     vec3 up = { 0.0, 1.0, 0.0 };
     renderer_set_camera_up(rndr, &up);
@@ -138,21 +152,20 @@ void draw(renderer *rndr) {
 
     vec3 player_shift_min = { 0.5f, 0.0f, 0.5f };
     vec3 player_shift_max = { 0.5f, 2.0f, 0.5f };
-    vec3 *pos = &box.pos;
-    vec3 *player_pos_min = vec3_sub(pos, &player_shift_min);
-    vec3 *player_pos_max = vec3_add(pos, &player_shift_max);
+    vec3 player_pos_min; vec3_sub(&box.pos, &player_shift_min, &player_pos_min);
+    vec3 player_pos_max; vec3_add(&box.pos, &player_shift_max, &player_pos_max);
 
-    rendering_context_render_box(rc, player_pos_min, player_pos_max);
+    rendering_context_render_box(rc, &player_pos_min, &player_pos_max);
 
     vec4 color2 = { 0.3, 0.9, 0.5, 1.0 };
     vec3 box_temp_pos = { 6.0f, 0.0f, 4.0f };
     vec3 box_shift_min = { 0.5f, 0.0f, 0.5f };
     vec3 box_shift_max = { 0.5f, 1.0f, 0.5f };
-    vec3 *box_pos_min = vec3_sub(&box_temp_pos, &box_shift_min);
-    vec3 *box_pos_max = vec3_add(&box_temp_pos, &box_shift_max);
+    vec3 box_pos_min; vec3_sub(&box_temp_pos, &box_shift_min, &box_pos_min);
+    vec3 box_pos_max; vec3_add(&box_temp_pos, &box_shift_max, &box_pos_max);
 
     rendering_context_set_uniform_vec4(rc, "vecColor", &color2);
-    rendering_context_render_box(rc, box_pos_min, box_pos_max);
+    rendering_context_render_box(rc, &box_pos_min, &box_pos_max);
 
     static vec4 color3 = { 0.6, 0.7, 0.9, 1.0 };
 
@@ -170,11 +183,6 @@ void draw(renderer *rndr) {
 
     renderer_finish_rendering(rndr, rc);
 
-    free(box_pos_max);
-    free(box_pos_min);
-
-    free(player_pos_max);
-    free(player_pos_min);
 }
 
 int main(int argc, char** argv) {
@@ -235,11 +243,8 @@ int main(int argc, char** argv) {
              glsl_ver );
 
     memset(&box, 0, sizeof(character));
-    box.pos.x = box.pos.y = box.pos.z = 0.0f;
-    box.velocity.x = box.velocity.y = box.velocity.z = 0.0f;
-    box.velocity_goal.x = box.velocity_goal.y = box.velocity_goal.z = 0.0f;
-    box.gravity.x = box.gravity.y = box.gravity.z = 0.0f;
     box.gravity.y = -4.0f;
+    box.speed = 5.0f;
 
     GLuint vao;
     glGenVertexArrays( 1, &vao );
@@ -279,7 +284,7 @@ int main(int argc, char** argv) {
                 if (event.key.keysym.sym == SDLK_d)
                     d_down = 1;
                 if (event.key.keysym.sym == SDLK_SPACE)
-                    box.velocity.y = 2.0f;
+                    box.movement.y = 2.0f;
                 break;
             case SDL_KEYUP:
                 if (event.key.keysym.sym == SDLK_p)
@@ -287,13 +292,13 @@ int main(int argc, char** argv) {
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     quit = 1;
                 if (event.key.keysym.sym == SDLK_w)
-                    w_down = 0; box.velocity_goal.z = 0.0f;
+                    w_down = 0; box.movement_goal.z = 0.0f;
                 if (event.key.keysym.sym == SDLK_a)
-                    a_down = 0; box.velocity_goal.x = 0.0f;
+                    a_down = 0; box.movement_goal.x = 0.0f;
                 if (event.key.keysym.sym == SDLK_s)
-                    s_down = 0; box.velocity_goal.z = 0.0f;
+                    s_down = 0; box.movement_goal.z = 0.0f;
                 if (event.key.keysym.sym == SDLK_d)
-                    d_down = 0; box.velocity_goal.x = 0.0;
+                    d_down = 0; box.movement_goal.x = 0.0f;
                 if (event.key.keysym.sym == SDLK_r)
                     box.pos.x = box.pos.y = box.pos.z = 0.0f;
                 break;
@@ -307,13 +312,13 @@ int main(int argc, char** argv) {
         }
 
         if (w_down)
-            box.velocity_goal.z = 15.0f;
+            box.movement_goal.x = box.speed;
         if (a_down)
-            box.velocity_goal.x = 15.0f;
+            box.movement_goal.z = box.speed;
         if (s_down)
-            box.velocity_goal.z = -15.0f;
+            box.movement_goal.x = -box.speed;
         if (d_down)
-            box.velocity_goal.x = -15.0f;
+            box.movement_goal.z = -box.speed;
 
         if (quit == 1) // if received instruction to quit
             break;
