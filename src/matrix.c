@@ -164,30 +164,32 @@ void mat4x4_set_mat4x4(mat4x4 *m1, const mat4x4 *m2) {
 mat4x4* mat4x4_look_at(vec3 *pos, vec3 *center, vec3 *up) {
     mat4x4* p = mat4x4_make_ident(NULL);
 
-    vec3 *ce = vec3_sub(center, pos);
-    vec3 *f = vec3_normalize(ce);
+    vec3 f;
+    vec3_sub(center, pos, &f);
+    vec3_normalize(&f, &f);
 
-    vec3 *nu = vec3_normalize(up);
-    vec3 *fnu = vec3_cross(f, nu);
-    vec3 *s = vec3_normalize(fnu);
+    vec3 u; vec3 s;
+    vec3_normalize(up, &u);
+    vec3_cross(&f, &u, &s);
+    vec3_normalize(&s, &s);
 
-    vec3 *u = vec3_cross(s, f);
+    vec3_cross(&s, &f, &u);
 
-    p->x[0] = s->x;
-    p->y[0] = s->y;
-    p->z[0] = s->z;
+    p->x[0] = s.x;
+    p->y[0] = s.y;
+    p->z[0] = s.z;
 
-    p->x[1] = u->x;
-    p->y[1] = u->y;
-    p->z[1] = u->z;
+    p->x[1] = u.x;
+    p->y[1] = u.y;
+    p->z[1] = u.z;
 
-    p->x[2] = -f->x;
-    p->y[2] = -f->y;
-    p->z[2] = -f->z;
+    p->x[2] = -f.x;
+    p->y[2] = -f.y;
+    p->z[2] = -f.z;
 
-    p->w[0] = -vec3_dot(s, pos);
-    p->w[1] = -vec3_dot(u, pos);
-    p->w[2] = vec3_dot(f, pos);
+    p->w[0] = -vec3_dot(&s, pos);
+    p->w[1] = -vec3_dot(&u, pos);
+    p->w[2] = vec3_dot(&f, pos);
 
     return p;
 }
@@ -235,20 +237,23 @@ mat4x4* mat4x4_inverted_tr(mat4x4 *m) {
 }
 
 mat4x4* mat4x4_camera_view(vec3 *pos, vec3 *dir, vec3 *up) {
-    vec3 *du = vec3_cross(dir, up);
-    vec3 *cam_right = vec3_normalize(du);
 
-    vec3 *cam_up = vec3_cross(cam_right, dir);
+    vec3 cam_right;
+    vec3_cross(dir, up, &cam_right);
+    vec3_normalize(&cam_right, &cam_right);
+
+    vec3 cam_up;
+    vec3_cross(&cam_right, dir, &cam_up);
 
     mat4x4 *r = mat4x4_make_ident(NULL);
 
-    r->x[0] = cam_right->x;
-    r->x[1] = cam_right->y;
-    r->x[2] = cam_right->z;
+    r->x[0] = cam_right.x;
+    r->x[1] = cam_right.y;
+    r->x[2] = cam_right.z;
 
-    r->y[0] = cam_up->x;
-    r->y[1] = cam_up->y;
-    r->y[2] = cam_up->z;
+    r->y[0] = cam_up.x;
+    r->y[1] = cam_up.y;
+    r->y[2] = cam_up.z;
 
     r->z[0] = -dir->x;
     r->z[1] = -dir->y;
@@ -260,9 +265,6 @@ mat4x4* mat4x4_camera_view(vec3 *pos, vec3 *dir, vec3 *up) {
 
     mat4x4 *ret = mat4x4_inverted_tr(r);
     mat4x4_cleanup(r);
-    free(cam_up);
-    free(cam_right);
-    free(du);
 
     return ret;
 }

@@ -171,62 +171,72 @@ void rendering_context_render_box(rendering_context* rc, vec3 *min, vec3 *max) {
     vec3 up = { 0.0f, max->y - min->y, 0.0f };
     vec3 right = { 0.0f, 0.0f, max->z - min->z };
 
-    vec3 *mr = vec3_add(min, &right);
-    vec3 *mru = vec3_add(mr, &up);
-    vec3 *mu = vec3_add(min, &up);
-    vec3 *muf = vec3_add(mu, &forward);
-    vec3 *mf = vec3_add(min, &forward);
-    vec3 *mfr = vec3_add(mf, &right);
-    vec3 *uf = vec3_add(&up, &forward);
-    vec3 *mruf = vec3_add(mr, uf);
-    vec3 *mfu = vec3_add(mf, &up);
+
+    vec3 mr = { 0.0, 0.0, 0.0 };
+    vec3_add(min, &right, &mr);
+    vec3 mru = { 0.0, 0.0, 0.0 };
+    vec3_add(&mr, &up, &mru);
+    vec3 mu = { 0.0, 0.0, 0.0 };
+    vec3_add(min, &up, &mu);
+    vec3 muf = { 0.0, 0.0, 0.0 };
+    vec3_add(&mu, &forward, &muf);
+    vec3 mf = { 0.0, 0.0, 0.0 };
+    vec3_add(min, &forward, &mf);
+    vec3 mfr = { 0.0, 0.0, 0.0 };
+    vec3_add(&mf, &right, &mfr);
+    vec3 uf = { 0.0, 0.0, 0.0 };
+    vec3_add(&up, &forward, &uf);
+    vec3 mruf = { 0.0, 0.0, 0.0 };
+    vec3_add(&mr, &uf, &mruf);
+    vec3 mfu = { 0.0, 0.0, 0.0 };
+    vec3_add(&mf, &up, &mfu);
 
     float back_verts[] = {
         /* back face */
         min->x, min->y, min->z, 1.0, 0.0, 0.0,
-        mr->x, mr->y, mr->z, 0.0, 1.0, 0.0,
-        mru->x, mru->y, mru->z, 1.0, 0.0, 1.0,
-        mu->x, mu->y, mu->z, 1.0, 1.0, 0.0
+        mr.x, mr.y, mr.z, 0.0, 1.0, 0.0,
+        mru.x, mru.y, mru.z, 1.0, 0.0, 1.0,
+        mu.x, mu.y, mu.z, 1.0, 1.0, 0.0
     };
 
     float left_verts[] = {
         /* left face */
         min->x, min->y, min->z, 1.0, 0.0, 0.0,
-        mu->x, mu->y, mu->z, 0.0, 1.0, 0.0,
-        muf->x, muf->y, muf->z, 1.0, 0.0, 1.0,
-        mf->x, mf->y, mf->z, 1.0, 1.0, 0.0
+        mu.x, mu.y, mu.z, 0.0, 1.0, 0.0,
+        muf.x, muf.y, muf.z, 1.0, 0.0, 1.0,
+        mf.x, mf.y, mf.z, 1.0, 1.0, 0.0
     };
 
     float bottom_verts[] = {
         /* bottom face */
         min->x, min->y, min->z, 1.0, 0.0, 0.0,
-        mf->x, mf->y, mf->z, 0.0, 1.0, 0.0,
-        mfr->x, mfr->y, mfr->z, 1.0, 0.0, 1.0,
-        mr->x, mr->y, mr->z, 1.0, 1.0, 0.0
+        mf.x, mf.y, mf.z, 0.0, 1.0, 0.0,
+        mfr.x, mfr.y, mfr.z, 1.0, 0.0, 1.0,
+        mr.x, mr.y, mr.z, 1.0, 1.0, 0.0
     };
 
     float top_verts[] = {
         /* top face */
-        mruf->x, mruf->y, mruf->z, 1.0, 0.0, 0.0,
-        muf->x, muf->y, muf->z, 0.0, 1.0, 0.0,
-        mu->x, mu->y, mu->z, 1.0, 0.0, 1.0,
-        mru->x, mru->y, mru->z, 1.0, 1.0, 0.0
+        mruf.x, mruf.y, mruf.z, 1.0, 0.0, 0.0,
+        muf.x, muf.y, muf.z, 0.0, 1.0, 0.0,
+        mu.x, mu.y, mu.z, 1.0, 0.0, 1.0,
+        mru.x, mru.y, mru.z, 1.0, 1.0, 0.0
     };
 
     float right_verts[] = {
         /* right face */
-        mruf->x, mruf->y, mruf->z, 1.0, 0.0, 0.0,
-        mru->x, mru->y, mru->z, 0.0, 1.0, 0.0,
-        mr->x, mr->y, mr->z, 1.0, 0.0, 1.0,
-        mfr->x, mfr->y, mfr->z, 1.0, 1.0, 0.0
+        mruf.x, mruf.y, mruf.z, 1.0, 0.0, 0.0,
+        mru.x, mru.y, mru.z, 0.0, 1.0, 0.0,
+        mr.x, mr.y, mr.z, 1.0, 0.0, 1.0,
+        mfr.x, mfr.y, mfr.z, 1.0, 1.0, 0.0
     };
 
     float front_verts[] = {
         /* front face */
-        mruf->x, mruf->y, mruf->z, 1.0, 0.0, 0.0,
-        mfr->x, mfr->y, mfr->z, 0.0, 1.0, 0.0,
-        mf->x, mf->y, mf->z, 1.0, 0.0, 0.0,
-        mfu->x, mfu->y, mfu->z, 1.0, 1.0, 0.0
+        mruf.x, mruf.y, mruf.z, 1.0, 0.0, 0.0,
+        mfr.x, mfr.y, mfr.z, 0.0, 1.0, 0.0,
+        mf.x, mf.y, mf.z, 1.0, 0.0, 0.0,
+        mfu.x, mfu.y, mfu.z, 1.0, 1.0, 0.0
     };
 
     rendering_context_begin_render_tri_fan(rc);
