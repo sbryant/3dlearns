@@ -99,7 +99,9 @@ void update(float dt) {
     vec3_mul_scalar(&forward, box.movement.x, &f_vel);
     vec3_mul_scalar(&right, box.movement.z, &r_vel);
 
+    float old_y = box.velocity.y;
     vec3_add(&f_vel, &r_vel, &box.velocity);
+    box.velocity.y = old_y;
 
     vec3 new_pos = { 0.0, 0.0, 0.0 };
     vec3_mul_scalar(&box.velocity, dt, &new_pos);
@@ -282,7 +284,7 @@ int main(int argc, char** argv) {
                 if (event.key.keysym.sym == SDLK_d)
                     box.movement_goal.z = -box.speed;
                 if (event.key.keysym.sym == SDLK_SPACE)
-                    box.movement.y = 2.0f;
+                    box.velocity.y = 7.0f;
                 break;
             case SDL_KEYUP:
                 if (event.key.keysym.sym == SDLK_p)
