@@ -267,7 +267,6 @@ int main(int argc, char** argv) {
     while(true) {
         SDL_Event event;
         int quit = 0;
-        int w_down, a_down, s_down, d_down = 0;
 
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -275,13 +274,13 @@ int main(int argc, char** argv) {
                 if (event.key.keysym.sym == SDLK_p)
                     pause = 1;
                 if (event.key.keysym.sym == SDLK_w)
-                    w_down = 1;
+                   box.movement_goal.x = box.speed;
                 if (event.key.keysym.sym == SDLK_a)
-                    a_down = 1;
+                    box.movement_goal.z = box.speed;
                 if (event.key.keysym.sym == SDLK_s)
-                    s_down = 1;
+                    box.movement_goal.x = -box.speed;
                 if (event.key.keysym.sym == SDLK_d)
-                    d_down = 1;
+                    box.movement_goal.z = -box.speed;
                 if (event.key.keysym.sym == SDLK_SPACE)
                     box.movement.y = 2.0f;
                 break;
@@ -291,13 +290,13 @@ int main(int argc, char** argv) {
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     quit = 1;
                 if (event.key.keysym.sym == SDLK_w)
-                    w_down = 0; box.movement_goal.z = 0.0f;
+                    box.movement_goal.x = 0.0f;
                 if (event.key.keysym.sym == SDLK_a)
-                    a_down = 0; box.movement_goal.x = 0.0f;
+                    box.movement_goal.z = 0.0f;
                 if (event.key.keysym.sym == SDLK_s)
-                    s_down = 0; box.movement_goal.z = 0.0f;
+                    box.movement_goal.x = 0.0f;
                 if (event.key.keysym.sym == SDLK_d)
-                    d_down = 0; box.movement_goal.x = 0.0f;
+                    box.movement_goal.z = 0.0f;
                 if (event.key.keysym.sym == SDLK_r)
                     box.pos.x = box.pos.y = box.pos.z = 0.0f;
                 break;
@@ -310,14 +309,6 @@ int main(int argc, char** argv) {
             }
         }
 
-        if (w_down)
-            box.movement_goal.x = box.speed;
-        if (a_down)
-            box.movement_goal.z = box.speed;
-        if (s_down)
-            box.movement_goal.x = -box.speed;
-        if (d_down)
-            box.movement_goal.z = -box.speed;
 
         if (quit == 1) // if received instruction to quit
             break;
