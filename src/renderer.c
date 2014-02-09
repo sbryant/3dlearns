@@ -1,6 +1,6 @@
 #include "renderer.h"
 #include "utils.h"
-#include <GL/glew.h>
+#include <glew.h>
 
 app* application = NULL;
 

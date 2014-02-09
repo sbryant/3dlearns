@@ -1,4 +1,4 @@
-#include <GL/glew.h>
+#include <glew.h>
 #include <stdlib.h>
 #include <assert.h>
 
