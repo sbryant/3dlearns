@@ -1,6 +1,11 @@
-#include <GL/glew.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <GL/glew.h>
 
 #include "shader.h"
 #include "utils.h"
@@ -27,18 +32,35 @@ void shader_cleanup(shader* s) {
     s = NULL;
 }
 
+char *read_shader(const char* path, ssize_t *size) {
+    int fd = open(path, O_RDONLY);
+    struct stat sb;
+    char *addr = NULL;
+    fstat(fd, &sb);
+    addr = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    close(fd);
+    *size = sb.st_size;
+    return addr;
+}
+
+void free_shader(char *addr, ssize_t size) {
+    munmap(addr, size);
+}
+
 void shader_compile(shader *s) {
     assert(s != NULL);
 
     GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
-    printf("Vert Path: %s\n", s->vertex_path);
-    char* vert_source = read_shader(s->vertex_path);
+    ssize_t vert_size;
+    char* vert_source = read_shader(s->vertex_path, &vert_size);
+
     assert(vert_source != NULL);
     glShaderSource(vert_shader, 1, (const GLchar**)&vert_source, NULL);
     glCompileShader(vert_shader);
 
     GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    GLchar* frag_source = (GLchar*)read_shader(s->fragment_path);
+    ssize_t frag_size;
+    GLchar* frag_source = (GLchar*)read_shader(s->fragment_path, &frag_size);
     assert(frag_source != NULL);
 
     glShaderSource(frag_shader, 1, (const GLchar**)&frag_source, NULL);
@@ -62,6 +84,6 @@ void shader_compile(shader *s) {
     glBindFragDataLocation( s->program, 0, "outColor" );
 
     /* clean up */
-    free(frag_source);
-    free(vert_source);
+    free_shader(frag_source, frag_size);
+    free_shader(vert_source, vert_size);
 }
