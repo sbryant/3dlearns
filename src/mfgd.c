@@ -115,7 +115,7 @@ void update(float dt) {
 void draw(renderer *rndr) {
     vec3 ang;
     euler_make_vector(&box.view_angle, &ang);
-    vec3_mul_scalar(&ang, 5, &ang);
+    vec3_mul_scalar(&ang, 5.0f, &ang);
 
     vec3 camera_pos = { 0.0, 0.0, 0.0 };
     vec3_sub(&(box.pos), &ang, &camera_pos);
