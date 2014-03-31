@@ -59,16 +59,14 @@ typedef struct s_character {
     vec3 velocity;
     vec3 gravity;
     euler view_angle;
-    int mouse_x;
-    int mouse_y;
     float speed;
 } character;
 
 character box;
 
 void mouse_move(character *c, int x, int y) {
-    int mouse_x = x - c->mouse_x;
-    int mouse_y = y - c->mouse_y;
+    int mouse_x = x;
+    int mouse_y = y;
 
     float sensitivity = 0.01f;
 
@@ -76,9 +74,6 @@ void mouse_move(character *c, int x, int y) {
     c->view_angle.y += mouse_x * sensitivity;
 
     euler_normalize(&c->view_angle, &c->view_angle);
-
-    c->mouse_x = x;
-    c->mouse_y = y;
 }
 
 void update(float dt) {
@@ -214,6 +209,8 @@ int main(int argc, char** argv) {
                                           1680, 1050,
                                           SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
 
+    SDL_SetRelativeMouseMode(true);
+
     /* initialize a render context, managed by SDL */
     SDL_GLContext *opengl3_context = SDL_GL_CreateContext(screen);
     SDL_GL_SetSwapInterval(1);
@@ -269,6 +266,7 @@ int main(int argc, char** argv) {
     while(true) {
         SDL_Event event;
         int quit = 0;
+        int rel_x; int rel_y;
 
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -303,7 +301,8 @@ int main(int argc, char** argv) {
                     box.pos.x = box.pos.y = box.pos.z = 0.0f;
                 break;
             case SDL_MOUSEMOTION:
-                mouse_move(&box, event.motion.x, event.motion.y);
+                SDL_GetRelativeMouseState(&rel_x, &rel_y);
+                mouse_move(&box, rel_x, rel_y);
                 break;
             case SDL_QUIT:
                 quit = 1;
