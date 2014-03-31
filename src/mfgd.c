@@ -212,7 +212,7 @@ int main(int argc, char** argv) {
     SDL_SetRelativeMouseMode(true);
 
     /* initialize a render context, managed by SDL */
-    SDL_GLContext *opengl3_context = SDL_GL_CreateContext(screen);
+    SDL_GLContext *opengl_context = SDL_GL_CreateContext(screen);
     SDL_GL_SetSwapInterval(1);
 
     /* Use GLEW to setup gl Functions */
@@ -335,7 +335,7 @@ int main(int argc, char** argv) {
 
     free(r);
 
-    SDL_GL_DeleteContext(opengl3_context);
+    SDL_GL_DeleteContext(opengl_context);
     SDL_DestroyWindow(screen);
     SDL_Quit();
 
