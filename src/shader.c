@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <GL/glew.h>
+#include <glew.h>
 
 #include "shader.h"
 #include "utils.h"
