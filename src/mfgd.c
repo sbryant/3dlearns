@@ -60,6 +60,7 @@ typedef struct s_character {
     vec3 gravity;
     euler view_angle;
     float speed;
+    int jumping;
 } character;
 
 static character box;
@@ -108,10 +109,10 @@ void update(float dt) {
     vec3_mul_scalar(&(box.gravity), dt_seconds, &new_vel);
     vec3_add(&(box.velocity), &new_vel, &box.velocity);
 
-    if (box.pos.y < 0.0f) {
+    if (box.pos.y <= 0.0f) {
         box.pos.y = 0.0f;
+        box.jumping = 0;
     }
-
 }
 
 void draw(renderer *rndr) {
@@ -282,8 +283,10 @@ int main(int argc, char** argv) {
                     box.movement_goal.x = -box.speed;
                 if (event.key.keysym.sym == SDLK_d)
                     box.movement_goal.z = -box.speed;
-                if (event.key.keysym.sym == SDLK_SPACE)
+                if (event.key.keysym.sym == SDLK_SPACE && !box.jumping) {
                     box.velocity.y = 10.0f;
+                    box.jumping = 1;
+                }
                 break;
             case SDL_KEYUP:
                 if (event.key.keysym.sym == SDLK_p)
