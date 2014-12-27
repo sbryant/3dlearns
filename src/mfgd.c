@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
                                           1680, 1050,
-                                          SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+                                          SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_OPENGL);
 
     SDL_SetRelativeMouseMode(true);
 
