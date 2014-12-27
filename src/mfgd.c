@@ -77,20 +77,22 @@ void mouse_move(character *c, int x, int y) {
 }
 
 void update(float dt) {
-    box.movement.x = approach(box.movement_goal.x, box.movement.x, dt * 65.0f);
-    box.movement.z = approach(box.movement_goal.z, box.movement.z, dt * 65.0f);
+    /* dt comes in milliseconds but calcs are in seconds */
+    float dt_seconds = dt / 1000.0f;
+    box.movement.x = approach(box.movement_goal.x, box.movement.x, dt_seconds * 45);
+    box.movement.z = approach(box.movement_goal.z, box.movement.z, dt_seconds * 45);
 
-    vec3 forward = { 0.0f, 0.0f, 0.0f };
+    vec3 forward = { 0.0f };
     euler_make_vector(&box.view_angle, &forward);
     forward.y = 0.0f;
     vec3_normalize(&forward, &forward);
 
     vec3 up = { 0.0f, 1.0f, 0.0f };
-    vec3 right = { 0.0f, 0.0f, 0.0f };
+    vec3 right = { 0.0f };
     vec3_cross(&up, &forward, &right);
 
-    vec3 f_vel = { 0.0, 0.0, 0.0 };
-    vec3 r_vel = { 0.0, 0.0, 0.0 };
+    vec3 f_vel = { 0.0f };
+    vec3 r_vel = { 0.0f };
     vec3_mul_scalar(&forward, box.movement.x, &f_vel);
     vec3_mul_scalar(&right, box.movement.z, &r_vel);
 
@@ -98,12 +100,12 @@ void update(float dt) {
     vec3_add(&f_vel, &r_vel, &box.velocity);
     box.velocity.y = old_y;
 
-    vec3 new_pos = { 0.0, 0.0, 0.0 };
-    vec3_mul_scalar(&box.velocity, dt, &new_pos);
+    vec3 new_pos = { 0.0f };
+    vec3_mul_scalar(&box.velocity, dt_seconds, &new_pos);
     vec3_add(&box.pos, &new_pos, &box.pos);
 
-    vec3 new_vel = { 0.0, 0.0, 0.0 };
-    vec3_mul_scalar(&(box.gravity), dt, &new_vel);
+    vec3 new_vel = { 0.0f };
+    vec3_mul_scalar(&(box.gravity), dt_seconds, &new_vel);
     vec3_add(&(box.velocity), &new_vel, &box.velocity);
 
     if (box.pos.y < 0.0f) {
@@ -240,9 +242,8 @@ int main(int argc, char** argv) {
              version,
              glsl_ver );
 
-    memset(&box, 0, sizeof(character));
-    box.gravity.y = -4.0f;
-    box.speed = 5.0f;
+    box.gravity.y = -25.0f;
+    box.speed = 100.0f;
 
     GLuint vao;
     glGenVertexArrays( 1, &vao );
@@ -282,7 +283,7 @@ int main(int argc, char** argv) {
                 if (event.key.keysym.sym == SDLK_d)
                     box.movement_goal.z = -box.speed;
                 if (event.key.keysym.sym == SDLK_SPACE)
-                    box.velocity.y = 7.0f;
+                    box.velocity.y = 10.0f;
                 break;
             case SDL_KEYUP:
                 if (event.key.keysym.sym == SDLK_p)
@@ -321,8 +322,9 @@ int main(int argc, char** argv) {
 
         float dt = now - old;
 
-        if (dt > 0.15f)
-            dt = 0.15f;
+        if( dt > 16.0f) {
+            dt = 16.0f;
+        }
 
         update(dt);
         draw(r);
