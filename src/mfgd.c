@@ -218,6 +218,11 @@ int main(int argc, char** argv) {
     SDL_GLContext *opengl_context = SDL_GL_CreateContext(screen);
     SDL_GL_SetSwapInterval(1);
 
+    GLenum err = glGetError();
+    if (err != 0) {
+        printf("GLError: %d\n", err);
+    }
+
     /* Use GLEW to setup gl Functions */
     glewExperimental = GL_TRUE;
     GLenum glew_status = glewInit();
@@ -231,6 +236,11 @@ int main(int argc, char** argv) {
     }
 
 	printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+    err = glGetError();
+    err = err == GL_INVALID_ENUM ? 0 : err;
+    if (err != 0) {
+        printf("GLError: %d\n", err);
+    }
 
     const GLubyte* vendor   = glGetString (GL_VENDOR);
     const GLubyte* renderer = glGetString (GL_RENDERER);
