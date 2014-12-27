@@ -39,3 +39,4 @@ vec3* vec3_make(void);
 void vec3_set_vec3(vec3 *v1, vec3 *v2);
 
 void vec4_print(vec4* const v);
+void vec3_print(vec3* const v);

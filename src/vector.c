@@ -98,6 +98,9 @@ vec3 *vec3_mul_scalar(const vec3* v, const float s, vec3 *out) {
 vec4 *vec4_div_scalar(vec4* const v, float const s) {
     vec4* v2 = vec4_make();
 
+    if(!v2)
+        return v2;
+
     v2->x = s / v->x ;
     v2->y = s / v->y;
     v2->z = s / v->z;
@@ -119,6 +122,9 @@ vec4 *vec4_normalize(vec4* const v) {
     vec4 *v2  = vec4_make();
     float v_len = vec4_length(v);
 
+    if(!v_len)
+        return v2;
+
     v2->x = v->x / v_len;
     v2->y = v->y / v_len;
     v2->z = v->z / v_len;
@@ -133,6 +139,9 @@ vec3 *vec3_normalize(const vec3 *v, vec3 *out) {
         v2 = vec3_make();
 
     float v_len = vec3_length(v);
+
+    if(!v_len)
+        return v2;
 
     v2->x = v->x / v_len;
     v2->y = v->y / v_len;
@@ -177,6 +186,13 @@ void vec4_print(vec4* const v) {
            v->y,
            v->z,
            v->w);
+}
+
+void vec3_print(vec3* const v) {
+    printf("x:%.5f y:%.5f z%.5f",
+           v->x,
+           v->y,
+           v->z);
 }
 
 
