@@ -62,7 +62,7 @@ typedef struct s_character {
     float speed;
 } character;
 
-character box;
+static character box;
 
 void mouse_move(character *c, int x, int y) {
     int mouse_x = x;
