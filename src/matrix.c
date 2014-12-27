@@ -19,17 +19,20 @@ vec4 *mat4x4_mul_vec4(mat4x4* const m, vec4* const v) {
 }
 
 
-mat4x4 *mat4x4_translate(mat4x4* m, float x, float y, float z) {
-    mat4x4* r = mat4x4_make_ident(NULL);
+mat4x4 *mat4x4_translate(mat4x4 *m, float x, float y, float z, mat4x4 *out) {
+    mat4x4* r = out;
+    if (r == NULL)
+        r = mat4x4_make_ident(NULL);
+
     r->w[0] = x;
     r->w[1] = y;
     r->w[2] = z;
 
-    mat4x4* res = mat4x4_mul(m, r);
+    mat4x4 *res = mat4x4_mul(m, r, NULL);
+    mat4x4_set_mat4x4(r, res);
+    mat4x4_cleanup(res);
 
-    mat4x4_cleanup(r);
-
-    return res;
+    return r;
 }
 
 void mat4x4_scale(mat4x4* m, float x, float y, float z) {
@@ -38,8 +41,10 @@ void mat4x4_scale(mat4x4* m, float x, float y, float z) {
     m->z[2] = z * m->z[2];
 }
 
-mat4x4 *mat4x4_mul(mat4x4* const m, mat4x4* const m2) {
-    mat4x4 *r = mat4x4_make_ident(NULL);
+mat4x4 *mat4x4_mul(const mat4x4* m, const mat4x4* m2, mat4x4 *out) {
+    mat4x4 *r = out;
+    if (r == NULL)
+        r = mat4x4_make_ident(NULL);
 
     for(int i = 0; i < 4; i++) {
         r->x[i] = mp_at(m,x,i) * mp_at(m2, x, 0) + \
@@ -79,7 +84,7 @@ mat4x4* mat4x4_init(mat4x4* r) {
 }
 
 mat4x4* mat4x4_make_ident(mat4x4* m) {
-    mat4x4* r = !m ? mat4x4_init(NULL) : m;
+    mat4x4* r =  mat4x4_init(m);
 
     memset((void*)&(r->m), 0, sizeof(float) * 16);
 
@@ -146,7 +151,7 @@ mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec3* axis) {
         r.y[1] = c;
     }
 
-    mat4x4 *res = mat4x4_mul(&r, m);
+    mat4x4 *res = mat4x4_mul(&r, m, NULL);
     mat4x4_cleanup_comp(&r);
 
     return res;
