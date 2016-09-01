@@ -1,5 +1,7 @@
 #pragma once
+#if !defined(_WIN32)
 #include <unistd.h>
+#endif
 #include <SDL.h>
 #include "matrix.h"
 #include "vector.h"

@@ -1,4 +1,9 @@
+#if defined(_WIN32) 
+#include <Windows.h>
+#endif
+
 #include <glew.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <SDL.h>
 
@@ -61,11 +66,11 @@ typedef struct s_character {
     euler view_angle;
     float speed;
     int jumping;
-} character;
+} g_character;
 
-static character box;
+static g_character box;
 
-void mouse_move(character *c, int x, int y) {
+void my_mouse_move(g_character *c, int x, int y) {
     int mouse_x = x;
     int mouse_y = y;
 
@@ -115,7 +120,7 @@ void update(float dt) {
     }
 }
 
-void draw(renderer *rndr) {
+void my_draw(renderer *rndr) {
     vec3 ang;
     euler_make_vector(&box.view_angle, &ang);
     vec3_mul_scalar(&ang, 5.0f, &ang);
@@ -184,7 +189,12 @@ void draw(renderer *rndr) {
 
 }
 
+#if defined(_WIN32)
+int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR     lpCmdLine,
+	int       nCmdShow ) {
+#else
 int main(int argc, char** argv) {
+#endif
     SDL_Init(SDL_INIT_VIDEO);
     SDL_DisplayMode info;
 
@@ -316,7 +326,7 @@ int main(int argc, char** argv) {
                 break;
             case SDL_MOUSEMOTION:
                 SDL_GetRelativeMouseState(&rel_x, &rel_y);
-                mouse_move(&box, rel_x, rel_y);
+                my_mouse_move(&box, rel_x, rel_y);
                 break;
             case SDL_QUIT:
                 quit = 1;
@@ -340,7 +350,7 @@ int main(int argc, char** argv) {
         }
 
         update(dt);
-        draw(r);
+        my_draw(r);
         SDL_GL_SwapWindow(screen);
 
     }

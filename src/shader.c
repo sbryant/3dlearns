@@ -1,14 +1,22 @@
 #include <stdlib.h>
 #include <assert.h>
+#if !defined(_WIN32)
 #include <unistd.h>
+#include <sys/mman.h>
+#else
+#include <Windows.h>
+#define ssize_t unsigned long
+#endif
 #include <stdlib.h>
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <glew.h>
 
 #include "shader.h"
 #include "utils.h"
+
+#define STB
+#include <STB.h>
 
 shader *make_shader(const char* name, const char* vertex_path, const char* frag_path) {
     shader *s = (shader*)calloc(1, sizeof(shader));
@@ -33,6 +41,31 @@ void shader_cleanup(shader* s) {
 }
 
 char *read_shader(const char* path, ssize_t *size) {
+#if defined(_WIN32)
+  char shader_path[MAX_PATH] = {0};
+
+  char* cpath = strdup(path);
+  char* c = NULL;
+  while (c = strchr(cpath, '/')) {
+	  *c = '\\';
+  }
+
+  _fullpath(shader_path, cpath, MAX_PATH);
+
+  HANDLE file_handle =  CreateFile(shader_path, GENERIC_READ, FILE_SHARE_READ, NULL,
+                        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+  if (file_handle == INVALID_HANDLE_VALUE) {
+	  long error = GetLastError();
+	  return NULL;
+  }
+
+  GetFileSizeEx(file_handle, size);
+  char* buffer = (char*)malloc(size);
+  ReadFile(file_handle, buffer, (long)(fsize), NULL, NULL);
+	CloseHandle(file_handle);
+	return buffer;
+#else
     int fd = open(path, O_RDONLY);
     struct stat sb;
     char *addr = NULL;
@@ -41,10 +74,15 @@ char *read_shader(const char* path, ssize_t *size) {
     close(fd);
     *size = sb.st_size;
     return addr;
+#endif
 }
 
 void free_shader(char *addr, ssize_t size) {
-    munmap(addr, size);
+#if defined(_WIN32)
+  free(addr, size);
+#else
+  munmap(addr, size);
+#endif
 }
 
 void shader_compile(shader *s) {

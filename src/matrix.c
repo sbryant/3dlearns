@@ -203,7 +203,7 @@ mat4x4* mat4x4_perspective(float fovy, float aspect, float znear, float zfar) {
     assert(aspect != 0.0);
     assert(znear != zfar);
 
-    const float rad = fovy * PI / 180.0f;
+    float rad = fovy * (float)PI / 180.0f;
     float tan_half_fovy = tan(rad / 2.0f);
 
     mat4x4 *res = mat4x4_make_ident(NULL);
