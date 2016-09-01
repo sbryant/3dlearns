@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-float vec4_length(vec4* const v) {
+float vec4_length(const vec4* v) {
     return sqrtf((v->x * v->x) +
                  (v->y * v->y) +
                  (v->z * v->z) +
@@ -17,14 +17,14 @@ float vec3_length(const vec3* v) {
                  (v->z * v->z));
 }
 
-float vec4_length_square(vec4* const v) {
+float vec4_length_square(const vec4* v) {
     return (v->x * v->x) +
         (v->y * v->y) +
         (v->z * v->z) +
         (v->w * v->w);
 }
 
-vec4* vec4_add(vec4* const v1, vec4* const v2) {
+vec4* vec4_add(const vec4* v1, const vec4* v2) {
     vec4 *vr = vec4_make();
 
     vr->x = v1->x + v2->x;
@@ -47,7 +47,7 @@ vec3* vec3_add(const vec3 *v1, const vec3 *v2, vec3 *out) {
     return vr;
 }
 
-vec4* vec4_sub(vec4* const v1, vec4* const v2) {
+vec4* vec4_sub(const vec4* v1, const vec4* v2) {
     vec4 *vr = vec4_make();
 
     vr->x = v1->x - v2->x;
@@ -72,7 +72,7 @@ vec3* vec3_sub(const vec3 *v1, const vec3 *v2, vec3 *out) {
 
 /* Vec4 scaling functions */
 
-vec4 *vec4_mul_scalar(vec4* const v, float const s) {
+vec4* vec4_mul_scalar(const vec4* v, float s) {
     vec4* v2 = vec4_make();
 
     v2->x = v->x * s;
@@ -83,7 +83,7 @@ vec4 *vec4_mul_scalar(vec4* const v, float const s) {
     return v2;
 }
 
-vec3 *vec3_mul_scalar(const vec3* v, const float s, vec3 *out) {
+vec3* vec3_mul_scalar(const vec3* v, float s, vec3* out) {
     vec3* v2 = out;
     if (v2 == NULL)
         v2 = vec3_make();
@@ -95,7 +95,7 @@ vec3 *vec3_mul_scalar(const vec3* v, const float s, vec3 *out) {
     return v2;
 }
 
-vec4 *vec4_div_scalar(vec4* const v, float const s) {
+vec4 *vec4_div_scalar(const vec4*  v, float s) {
     vec4* v2 = vec4_make();
 
     if(!v2)
@@ -118,7 +118,7 @@ vec3* vec3_make(void) {
 }
 
 
-vec4 *vec4_normalize(vec4* const v) {
+vec4 *vec4_normalize(const vec4* v) {
     vec4 *v2  = vec4_make();
     float v_len = vec4_length(v);
 
@@ -150,15 +150,15 @@ vec3 *vec3_normalize(const vec3 *v, vec3 *out) {
     return v2;
 }
 
-float vec4_dot(vec4* const a, vec4* const b) {
+float vec4_dot(const vec4* a, const vec4* b) {
     return (a->x * b->x) + (a->y * b->y) + (a->z * b->z) + (a->w * b->w);
 }
 
-float vec3_dot(vec3* const a, vec3* const b) {
+float vec3_dot(const vec3* a, const vec3* b) {
     return (a->x * b->x) + (a->y * b->y) + (a->z * b->z);
 }
 
-vec4* vec4_cross(vec4* const a, vec4* const b) {
+vec4* vec4_cross(const vec4* a, const vec4* b) {
     vec4 *v  = vec4_make();
     v->x = (a->y * b->z) - (b->y * a->z);
     v->y = (a->z * b->x) - (b->z * a->x);
@@ -180,7 +180,7 @@ vec3* vec3_cross(const vec3* a, const vec3* b, vec3 *out) {
     return v;
 }
 
-void vec4_print(vec4* const v) {
+void vec4_print(const vec4* v) {
     printf("x:%.2f y:%.2f z%.2f w%.2f\n",
            v->x,
            v->y,
@@ -188,7 +188,7 @@ void vec4_print(vec4* const v) {
            v->w);
 }
 
-void vec3_print(vec3* const v) {
+void vec3_print(const vec3* v) {
     printf("x:%.5f y:%.5f z%.5f",
            v->x,
            v->y,
@@ -196,8 +196,8 @@ void vec3_print(vec3* const v) {
 }
 
 
-void vec3_set_vec3(vec3 *v1, vec3 *v2) {
-    v1->x = v2->x;
-    v1->y = v2->y;
-    v1->z = v2->z;
+void vec3_copy(vec3 *dest, vec3 *src) {
+    dest->x = src->x;
+    dest->y = src->y;
+    dest->z = src->z;
 }

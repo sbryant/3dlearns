@@ -199,7 +199,7 @@ mat4x4* mat4x4_look_at(vec3 *pos, vec3 *center, vec3 *up) {
     return p;
 }
 
-mat4x4* mat4x4_perspective(const float fovy, const float aspect, const float znear, const float zfar) {
+mat4x4* mat4x4_perspective(float fovy, float aspect, float znear, float zfar) {
     assert(aspect != 0.0);
     assert(znear != zfar);
 
