@@ -66,9 +66,10 @@ vec3 *renderer_camera_position(renderer *r) {
 
 render_context* make_render_context(void) {
     render_context* r = (render_context*)calloc(1, sizeof(render_context));
-    r->proj = mat4x4_make_ident(NULL);
-    r->view = mat4x4_make_ident(NULL);
-    r->model = mat4x4_make_ident(NULL);
+
+	r->proj = mat4x4_make(); mat4x4_make_ident(r->proj);
+	r->view = mat4x4_make();  mat4x4_make_ident(r->view);
+	r->model = mat4x4_make(); mat4x4_make_ident(r->model);
 
     return r;
 }

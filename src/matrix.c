@@ -19,16 +19,15 @@ vec4 *mat4x4_mul_vec4(mat4x4* const m, vec4* const v) {
 }
 
 
-mat4x4 *mat4x4_translate(mat4x4 *m, float x, float y, float z, mat4x4 *out) {
+void mat4x4_translate(mat4x4 *m, float x, float y, float z, mat4x4 *out) {
+	assert(out != NULL);
     mat4x4* r = out;
-    if (r == NULL)
-        r = mat4x4_make_ident(NULL);
 
     r->w[0] = x;
     r->w[1] = y;
     r->w[2] = z;
 
-    mat4x4 *res = mat4x4_mul(m, r, NULL);
+	mat4x4 *res = NULL; mat4x4_mul(m, r, res);
     mat4x4_set_mat4x4(r, res);
     mat4x4_cleanup(res);
 
@@ -41,10 +40,9 @@ void mat4x4_scale(mat4x4* m, float x, float y, float z) {
     m->z[2] = z * m->z[2];
 }
 
-mat4x4 *mat4x4_mul(const mat4x4* m, const mat4x4* m2, mat4x4 *out) {
+void mat4x4_mul(const mat4x4* m, const mat4x4* m2, mat4x4 *out) {
+	assert(out != NULL);
     mat4x4 *r = out;
-    if (r == NULL)
-        r = mat4x4_make_ident(NULL);
 
     for(int i = 0; i < 4; i++) {
         r->x[i] = mp_at(m,x,i) * mp_at(m2, x, 0) + \
@@ -71,29 +69,27 @@ mat4x4 *mat4x4_mul(const mat4x4* m, const mat4x4* m2, mat4x4 *out) {
     return r;
 }
 
-mat4x4* mat4x4_init(mat4x4* r) {
-    if (!r)
-        r = (mat4x4*)calloc(1, sizeof(mat4x4));
-
+mat4x4* mat4x4_make(void) {
+	mat4x4* m = (mat4x4*)calloc(1, sizeof(mat4x4));
+	mat4x4_init(m);
+	return m;
+}
+void mat4x4_init(mat4x4* r) {
     r->x = (r->m);
     r->y = (r->m)+4;
     r->z = (r->m)+8;
     r->w = (r->m)+12;
-
-    return r;
 }
 
-mat4x4* mat4x4_make_ident(mat4x4* m) {
-    mat4x4* r =  mat4x4_init(m);
+void mat4x4_make_ident(mat4x4* m) {
+	assert(m != NULL);
 
-    memset((void*)&(r->m), 0, sizeof(float) * 16);
+    memset((void*)m, 0, sizeof(float) * 16);
 
-    r->x[0] = 1.0;
-    r->y[1] = 1.0;
-    r->z[2] = 1.0;
-    r->w[3] = 1.0;
-
-    return r;
+    m->x[0] = 1.0;
+    m->y[1] = 1.0;
+    m->z[2] = 1.0;
+    m->w[3] = 1.0;
 }
 
 float* mat4x4_make_array(mat4x4* const m) {
@@ -151,7 +147,7 @@ mat4x4* mat4x4_rotate(mat4x4* m, float angle, vec3* axis) {
         r.y[1] = c;
     }
 
-    mat4x4 *res = mat4x4_mul(&r, m, NULL);
+	mat4x4 *res = NULL; mat4x4_mul(&r, m, res);
     mat4x4_cleanup_comp(&r);
 
     return res;
@@ -167,7 +163,7 @@ void mat4x4_set_mat4x4(mat4x4 *m1, const mat4x4 *m2) {
 }
 
 mat4x4* mat4x4_look_at(vec3 *pos, vec3 *center, vec3 *up) {
-    mat4x4* p = mat4x4_make_ident(NULL);
+	mat4x4* p = NULL; mat4x4_make_ident(p);
 
     vec3 f;
     vec3_sub(center, pos, &f);
@@ -206,7 +202,7 @@ mat4x4* mat4x4_perspective(float fovy, float aspect, float znear, float zfar) {
     float rad = fovy * (float)PI / 180.0f;
     float tan_half_fovy = tan(rad / 2.0f);
 
-    mat4x4 *res = mat4x4_make_ident(NULL);
+	mat4x4 *res = mat4x4_make(); mat4x4_make_ident(res);
     res->x[0] = 1.0f / (aspect * tan_half_fovy);
     res->y[1] = 1.0f / tan_half_fovy;
 
@@ -220,7 +216,7 @@ mat4x4* mat4x4_perspective(float fovy, float aspect, float znear, float zfar) {
 }
 
 mat4x4* mat4x4_inverted_tr(mat4x4 *m) {
-    mat4x4 *r = mat4x4_make_ident(NULL);
+	mat4x4 *r = mat4x4_make(); mat4x4_make_ident(r);
 
     for(int i = 0; i < 3; i++) {
         for(int j = 0; j < 3; j++) {
@@ -250,7 +246,7 @@ mat4x4* mat4x4_camera_view(vec3 *pos, vec3 *dir, vec3 *up) {
     vec3 cam_up;
     vec3_cross(&cam_right, dir, &cam_up);
 
-    mat4x4 *r = mat4x4_make_ident(NULL);
+	mat4x4 *r = mat4x4_make(); mat4x4_make_ident(r);
 
     r->x[0] = cam_right.x;
     r->x[1] = cam_right.y;
