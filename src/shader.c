@@ -5,7 +5,7 @@
 #include <sys/mman.h>
 #else
 #include <Windows.h>
-#define ssize_t unsigned long
+#define ssize_t size_t
 #endif
 #include <stdlib.h>
 #include <fcntl.h>
@@ -60,9 +60,11 @@ char *read_shader(const char* path, ssize_t *size) {
 	  return NULL;
   }
 
-  GetFileSizeEx(file_handle, size);
-  char* buffer = (char*)malloc(size);
-  ReadFile(file_handle, buffer, (long)(fsize), NULL, NULL);
+  LARGE_INTEGER lsize;
+  GetFileSizeEx(file_handle, &lsize);
+  *size = lsize.LowPart;
+  char* buffer = (char*)malloc(*size);
+  ReadFile(file_handle, buffer, (long)(*size), NULL, NULL);
 	CloseHandle(file_handle);
 	return buffer;
 #else
