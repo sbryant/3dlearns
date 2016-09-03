@@ -19,7 +19,7 @@
 #include <STB.h>
 
 shader *make_shader(const char* name, const char* vertex_path, const char* frag_path) {
-    shader *s = (shader*)calloc(1, sizeof(shader));
+    shader *s = (shader*)calloc(1, sizeof(*s));
 
     /* cheat for now, copy later */
     s->program_name = (char *)name;

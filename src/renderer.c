@@ -49,7 +49,7 @@ void renderer_set_camera_position(renderer* r, const vec3 pos) {
 }
 
 render_context* make_render_context(void) {
-    render_context* r = (render_context*)calloc(1, sizeof(render_context));
+    render_context* r = (render_context*)calloc(1, sizeof(*r));
 
 	mat4x4_identity(r->proj);
 	mat4x4_identity(r->view);
@@ -61,7 +61,7 @@ render_context* make_render_context(void) {
 rendering_context* make_rendering_context(renderer* rndr) {
     assert(application != NULL);
 
-    rendering_context* r = (rendering_context*)calloc(1, sizeof(rendering_context));
+    rendering_context* r = (rendering_context*)calloc(1, sizeof(*r));
     render_context* rc = make_render_context();
 
     r->context = rc;
