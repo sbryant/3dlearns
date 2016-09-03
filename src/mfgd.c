@@ -157,7 +157,6 @@ int main(int argc, char** argv) {
 		update(dt);
 		my_draw();
 		SDL_GL_SwapWindow(screen);
-
 	}
 
 	glDeleteVertexArrays(1, &renderInfo.shaderInfo.vao);
