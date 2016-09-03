@@ -18,14 +18,12 @@ struct s_RenderInfo {
 	unsigned int width, height;
 };
 
-
 static struct s_RenderInfo renderInfo = { 0 };
 
 void update(float dt) {
 }
 
 void my_draw() {
-
     glUseProgram(renderInfo.shaderInfo.program);
 
     glClearColor(210.f / 255.f, 230.f / 255.f, 1.f, 1.f);
@@ -115,9 +113,8 @@ int main(int argc, char** argv) {
 	init_shader(&renderInfo.shaderInfo, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
 	shader_compile(&renderInfo.shaderInfo);
 
-    GLuint vao;
-    glGenVertexArrays( 1, &vao );
-    glBindVertexArray( vao );
+    glGenVertexArrays( 1, &renderInfo.shaderInfo.vao);
+    glBindVertexArray(renderInfo.shaderInfo.vao);
 
     glEnable(GL_DEPTH_TEST);
     uint32_t old = SDL_GetTicks();

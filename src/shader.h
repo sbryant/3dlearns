@@ -6,6 +6,7 @@ typedef struct s_shader {
     int program;
     int vertex_shader;
     int fragment_shader;
+	int vao;
     char program_name[MAX_PATH];
     char vertex_path[MAX_PATH];
     char fragment_path[MAX_PATH];
