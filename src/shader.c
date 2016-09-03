@@ -99,15 +99,18 @@ void shader_compile(shader *s) {
     glShaderSource(vert_shader, 1, (const GLchar**)&vert_source, NULL);
     glCompileShader(vert_shader);
 
-	int status;  glGetShaderiv(vert_shader, GL_COMPILE_STATUS, &status);
+	{
+		int status;  glGetShaderiv(vert_shader, GL_COMPILE_STATUS, &status);
 
-	if (status == GL_FALSE) {
-		int bufferSize, cpySize; glGetShaderiv(vert_shader, GL_INFO_LOG_LENGTH, &bufferSize);
-		char* buffer = (char*)malloc(bufferSize + 1);
-		glGetShaderInfoLog(vert_shader, bufferSize, &cpySize, buffer);
-		buffer[bufferSize] = '\0';
-		fprintf(stderr, "The vertex shader log:\n%s\n", buffer);
-		fflush(stderr);
+		if (status == GL_FALSE) {
+			int bufferSize, cpySize; glGetShaderiv(vert_shader, GL_INFO_LOG_LENGTH, &bufferSize);
+			char* buffer = (char*)malloc(bufferSize + 1);
+			glGetShaderInfoLog(vert_shader, bufferSize, &cpySize, buffer);
+			buffer[bufferSize] = '\0';
+			fprintf(stderr, "The vertex shader info log:\n%s\n", buffer);
+			fflush(stderr);
+			free(buffer);
+		}
 	}
 
     GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -117,6 +120,20 @@ void shader_compile(shader *s) {
 
     glShaderSource(frag_shader, 1, (const GLchar**)&frag_source, NULL);
     glCompileShader(frag_shader);
+
+	{
+		int status;  glGetShaderiv(frag_shader, GL_COMPILE_STATUS, &status);
+
+		if (status == GL_FALSE) {
+			int bufferSize, cpySize; glGetShaderiv(vert_shader, GL_INFO_LOG_LENGTH, &bufferSize);
+			char* buffer = (char*)malloc(bufferSize + 1);
+			glGetShaderInfoLog(frag_shader, bufferSize, &cpySize, buffer);
+			buffer[bufferSize] = '\0';
+			fprintf(stderr, "The frag shader info log:\n%s\n", buffer);
+			fflush(stderr);
+			free(buffer);
+		}
+	}
 
     GLuint program = glCreateProgram();
 
