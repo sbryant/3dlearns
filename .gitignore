@@ -9,3 +9,8 @@ mfgd
 x64/
 x86/
 Debug/
+
+3dlearns.opensdf
+3dlearns.sdf
+3dlearns.vcxproj.user
+3dlearns.vcxproj.filters
