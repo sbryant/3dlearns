@@ -44,7 +44,7 @@ char *read_shader(const char* path, ssize_t *size) {
 #if defined(_WIN32)
   char shader_path[MAX_PATH] = {0};
 
-  char* cpath = strdup(path);
+  char* cpath = _strdup(path);
   char* c = NULL;
   while (c = strchr(cpath, '/')) {
 	  *c = '\\';
@@ -82,7 +82,7 @@ char *read_shader(const char* path, ssize_t *size) {
 
 void free_shader(char *addr, ssize_t size) {
 #if defined(_WIN32)
-  free(addr, size);
+  free(addr);
 #else
   munmap(addr, size);
 #endif
