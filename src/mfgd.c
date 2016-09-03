@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <SDL.h>
+#undef main
 
 #include "matrix.h"
 #include "vector.h"
@@ -189,7 +190,7 @@ void my_draw(renderer *rndr) {
 
 }
 
-#if defined(_WIN32)
+#if defined(_WIN32) && 0
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR     lpCmdLine,
 	int       nCmdShow ) {
 #else
