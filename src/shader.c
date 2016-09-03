@@ -7,6 +7,7 @@
 #include <Windows.h>
 #define ssize_t size_t
 #endif
+#include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -21,12 +22,17 @@
 shader *make_shader(const char* name, const char* vertex_path, const char* frag_path) {
     shader *s = (shader*)calloc(1, sizeof(*s));
 
-    /* cheat for now, copy later */
-    s->program_name = (char *)name;
-    s->vertex_path = (char *)vertex_path;
-    s->fragment_path = (char *)frag_path;
-
+	init_shader(s, name, vertex_path, frag_path);
     return s;
+}
+
+void init_shader(shader* s, const char* name, const char* vertex_path, const char* frag_path) {
+	assert(s != NULL);
+
+	/* cheat for now, copy later */
+	strcpy_s(s->program_name, sizeof(s->program_name), name);
+	strcpy_s(s->vertex_path, sizeof(s->vertex_path), vertex_path);
+	strcpy_s(s->fragment_path, sizeof(s->fragment_path), frag_path);
 }
 
 void shader_cleanup(shader* s) {
