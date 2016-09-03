@@ -9,7 +9,7 @@ mfgd
 x64/
 x86/
 Debug/
-
+.vs/
 3dlearns.opensdf
 3dlearns.sdf
 3dlearns.vcxproj.user
