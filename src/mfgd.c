@@ -219,7 +219,7 @@ int main(int argc, char** argv) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,8);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
     /* Create a fullscreen window */
     SDL_Window *screen = SDL_CreateWindow("MFGD",
