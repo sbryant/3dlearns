@@ -3,8 +3,6 @@
 #include <glew.h>
 #include <string.h>
 
-app* application = NULL;
-
 void renderer_init(renderer* r) {
 	glGenBuffers(1, &(r->vbo));
 	glBindBuffer(GL_ARRAY_BUFFER, r->vbo);
@@ -58,8 +56,8 @@ render_context* make_render_context(void) {
     return r;
 }
 
-rendering_context* make_rendering_context(renderer* rndr) {
-    assert(application != NULL);
+rendering_context* make_rendering_context(renderer* rndr, unsigned int width, unsigned int height) {
+	assert(width > 0 && height > 0);
 
     rendering_context* r = (rendering_context*)calloc(1, sizeof(*r));
     render_context* rc = make_render_context();
@@ -72,8 +70,8 @@ rendering_context* make_rendering_context(renderer* rndr) {
 
     r->renderer = rndr;
 
-    r->context->viewport_width = application->w;
-    r->context->viewport_height = application->h;
+    r->context->viewport_width = width;
+    r->context->viewport_height = height;
     r->context->viewport_x = 0;
     r->context->viewport_y = 0;
 
@@ -88,11 +86,11 @@ void rendering_context_set_view(rendering_context *r, mat4x4 m) {
 	mat4x4_dup(r->context->view, m);
 }
 
-void renderer_start_rendering(renderer *rndr, rendering_context *rc) {
-    assert(application != NULL);
+void renderer_start_rendering(renderer *rndr, rendering_context *rc, unsigned int width, unsigned int height) {
+    assert(width > 0 && height > 0);
 
-    rndr->width = application->w;
-    rndr->height = application->h;
+	rndr->width = width;
+	rndr->height = height;
 
     float aspect = rndr->width/(float)rndr->height;
 

@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
 
     SDL_GetCurrentDisplayMode(0, &info);
 
-    application = (app*)malloc(sizeof(app));
+    app* application = (app*)malloc(sizeof(application));
     application->w = info.w;
     application->h = info.h;
 

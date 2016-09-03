@@ -51,8 +51,6 @@ typedef struct s_rendering_context {
     unsigned int vbo;
 } rendering_context;
 
-extern app* application;
-
 renderer* make_renderer(int w, int h);
 void renderer_init(renderer* r);
 void renderer_set_size(renderer *r, int w, int h);
@@ -65,10 +63,10 @@ void renderer_set_camera_position(renderer* r, const vec3 pos);
 
 render_context* make_render_context(void);
 
-rendering_context* make_rendering_context(renderer* rndr);
+rendering_context* make_rendering_context(renderer* rndr, unsigned int width, unsigned int height);
 void rendering_context_set_projection(rendering_context *r, mat4x4 m);
 void rendering_context_set_view(rendering_context *r, mat4x4 m);
-void renderer_start_rendering(renderer *rndr, rendering_context *rc);
+void renderer_start_rendering(renderer *rndr, rendering_context *rc, unsigned int width, unsigned int height);
 void renderer_finish_rendering(renderer *rndr, rendering_context *rc);
 void rendering_context_set_uniform_vec4(rendering_context* rc, const char* name, vec4 v);
 void rendering_context_set_uniform_mat4x4(rendering_context* rc, const char* name, const mat4x4 m);
