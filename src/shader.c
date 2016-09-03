@@ -86,7 +86,7 @@ char *read_shader(const char* path, ssize_t *size) {
 #endif
 }
 
-void free_shader(char *addr, ssize_t size) {
+void free_shader(char *addr) {
 #if defined(_WIN32)
   free(addr);
 #else
@@ -104,6 +104,7 @@ void shader_compile(shader *s) {
     assert(vert_source != NULL);
     glShaderSource(vert_shader, 1, (const GLchar**)&vert_source, NULL);
     glCompileShader(vert_shader);
+	free_shader(vert_source);
 
 	{
 		int status;  glGetShaderiv(vert_shader, GL_COMPILE_STATUS, &status);
@@ -126,6 +127,7 @@ void shader_compile(shader *s) {
 
     glShaderSource(frag_shader, 1, (const GLchar**)&frag_source, NULL);
     glCompileShader(frag_shader);
+	free_shader(frag_source);
 
 	{
 		int status;  glGetShaderiv(frag_shader, GL_COMPILE_STATUS, &status);
@@ -173,7 +175,4 @@ void shader_compile(shader *s) {
 
     glBindFragDataLocation( s->program, 0, "outColor" );
 
-    /* clean up */
-    free_shader(frag_source, frag_size);
-    free_shader(vert_source, vert_size);
 }
