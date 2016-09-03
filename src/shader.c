@@ -63,8 +63,9 @@ char *read_shader(const char* path, ssize_t *size) {
   LARGE_INTEGER lsize;
   GetFileSizeEx(file_handle, &lsize);
   *size = lsize.LowPart;
-  char* buffer = (char*)malloc(*size);
+  char* buffer = (char*)malloc(*size + 1);
   ReadFile(file_handle, buffer, (long)(*size), NULL, NULL);
+  buffer[*size] = '\0';
 	CloseHandle(file_handle);
 	return buffer;
 #else
