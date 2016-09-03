@@ -10,18 +10,28 @@
 
 #include "linmath.h"
 #include "utils.h"
-#include "renderer.h"
 #include "shader.h"
+
+
+struct s_RenderInfo {
+	shader shaderInfo;
+	unsigned int width, height;
+};
+
+
+static struct s_RenderInfo renderInfo = { 0 };
 
 void update(float dt) {
 }
 
-void my_draw(renderer *rndr) {
+void my_draw() {
 
-    glUseProgram(rndr->shader->program);
+    glUseProgram(renderInfo.shaderInfo.program);
 
     glClearColor(210.f / 255.f, 230.f / 255.f, 1.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 #if defined(_WIN32) && 0
@@ -35,11 +45,10 @@ int main(int argc, char** argv) {
 
     SDL_GetCurrentDisplayMode(0, &info);
 
-    app* application = (app*)malloc(sizeof(application));
-    application->w = info.w;
-    application->h = info.h;
+	renderInfo.width = (unsigned int)info.w;
+	renderInfo.height = (unsigned int)info.h;
 
-    printf("w %d, h %d\n", application->w, application->h);
+    printf("w %d, h %d\n", info.w, info.h);
 
     /* Setup OpenGL 3.2 Context For OS X */
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -103,24 +112,12 @@ int main(int argc, char** argv) {
              version,
              glsl_ver );
 
+	init_shader(&renderInfo.shaderInfo, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
+	shader_compile(&renderInfo.shaderInfo);
+
     GLuint vao;
     glGenVertexArrays( 1, &vao );
     glBindVertexArray( vao );
-
-    shader *s = make_shader("model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
-    shader_compile(s);
-
-    int w, h;
-    get_screen_size(&w, &h);
-	struct s_renderer r = {
-		.width = w,
-		.height = h
-	};
-
-	renderer_init(&r);
-
-    /* hook renderer up with our shader prog */
-    r.shader = s;
 
     glEnable(GL_DEPTH_TEST);
     uint32_t old = SDL_GetTicks();
@@ -162,12 +159,12 @@ int main(int argc, char** argv) {
         }
 
         update(dt);
-        my_draw(&r);
+        my_draw();
         SDL_GL_SwapWindow(screen);
 
     }
 
-    shader_cleanup(s);
+    shader_cleanup(&renderInfo.shaderInfo);
     glDeleteVertexArrays(1, &vao);
 
     SDL_GL_DeleteContext(opengl_context);

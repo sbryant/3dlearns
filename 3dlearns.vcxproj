@@ -150,13 +150,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\mfgd.c" />
-    <ClCompile Include="src\renderer.c" />
     <ClCompile Include="src\shader.c" />
     <ClCompile Include="src\utils.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\linmath.h" />
-    <ClInclude Include="src\renderer.h" />
     <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\utils.h" />
   </ItemGroup>
