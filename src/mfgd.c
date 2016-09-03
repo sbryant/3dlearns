@@ -29,6 +29,7 @@ void my_draw() {
 	glClearColor(210.f / 255.f, 230.f / 255.f, 1.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glBindVertexArray(renderInfo.shaderInfo.vao);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
@@ -114,8 +115,7 @@ int main(int argc, char** argv) {
 	shader_compile(&renderInfo.shaderInfo);
 
 	glGenVertexArrays(1, &renderInfo.shaderInfo.vao);
-	glBindVertexArray(renderInfo.shaderInfo.vao);
-
+	
 	uint32_t old = SDL_GetTicks();
 	uint32_t now = SDL_GetTicks();
 	int pause = 0;
