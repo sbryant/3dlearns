@@ -6,190 +6,33 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <SDL.h>
+#undef main
 
-#include "matrix.h"
-#include "vector.h"
+#include "linmath.h"
 #include "utils.h"
-#include "renderer.h"
 #include "shader.h"
 
-typedef struct s_euler {
-    float p;
-    float y;
-    float r;
-} euler;
 
-euler *make_euler(void) {
-    return (euler *)calloc(1, sizeof(euler));
-}
+struct s_RenderInfo {
+	shader shaderInfo;
+	unsigned int width, height;
+};
 
-euler *euler_normalize(euler *angle, euler *out) {
-    euler *result = out;
-
-    if (result == NULL)
-        result = make_euler();
-
-    if (angle->p > 89.0f)
-        result->p = 89.0f;
-    if (angle->p < -89.0f)
-        result->p = -89.0f;
-
-    result->y = angle->y;
-
-    while (result->y < -180.0f)
-        result->y += 360.0f;
-    while (result->y > 180.0f)
-        result->y -= 360.0f;
-
-    return result;
-}
-
-vec3 *euler_make_vector(euler *angle, vec3 *out) {
-    vec3 *r = out;
-
-    if (r == NULL)
-        r = vec3_make();
-
-    r->x = cosf(angle->y) * cosf(angle->p);
-    r->y = sinf(angle->p);
-    r->z = sinf(angle->y) * cosf(angle->p);
-
-    return r;
-}
-
-typedef struct s_character {
-    vec3 pos;
-    vec3 movement;
-    vec3 movement_goal;
-    vec3 velocity;
-    vec3 gravity;
-    euler view_angle;
-    float speed;
-    int jumping;
-} g_character;
-
-static g_character box;
-
-void my_mouse_move(g_character *c, int x, int y) {
-    int mouse_x = x;
-    int mouse_y = y;
-
-    float sensitivity = 0.01f;
-
-    c->view_angle.p += mouse_y * sensitivity;
-    c->view_angle.y += mouse_x * sensitivity;
-
-    euler_normalize(&c->view_angle, &c->view_angle);
-}
+static struct s_RenderInfo renderInfo = { 0 };
 
 void update(float dt) {
-    /* dt comes in milliseconds but calcs are in seconds */
-    float dt_seconds = dt / 1000.0f;
-    box.movement.x = approach(box.movement_goal.x, box.movement.x, dt_seconds * 45);
-    box.movement.z = approach(box.movement_goal.z, box.movement.z, dt_seconds * 45);
-
-    vec3 forward = { 0.0f };
-    euler_make_vector(&box.view_angle, &forward);
-    forward.y = 0.0f;
-    vec3_normalize(&forward, &forward);
-
-    vec3 up = { 0.0f, 1.0f, 0.0f };
-    vec3 right = { 0.0f };
-    vec3_cross(&up, &forward, &right);
-
-    vec3 f_vel = { 0.0f };
-    vec3 r_vel = { 0.0f };
-    vec3_mul_scalar(&forward, box.movement.x, &f_vel);
-    vec3_mul_scalar(&right, box.movement.z, &r_vel);
-
-    float old_y = box.velocity.y;
-    vec3_add(&f_vel, &r_vel, &box.velocity);
-    box.velocity.y = old_y;
-
-    vec3 new_pos = { 0.0f };
-    vec3_mul_scalar(&box.velocity, dt_seconds, &new_pos);
-    vec3_add(&box.pos, &new_pos, &box.pos);
-
-    vec3 new_vel = { 0.0f };
-    vec3_mul_scalar(&(box.gravity), dt_seconds, &new_vel);
-    vec3_add(&(box.velocity), &new_vel, &box.velocity);
-
-    if (box.pos.y <= 0.0f) {
-        box.pos.y = 0.0f;
-        box.jumping = 0;
-    }
 }
 
-void my_draw(renderer *rndr) {
-    vec3 ang;
-    euler_make_vector(&box.view_angle, &ang);
-    vec3_mul_scalar(&ang, 5.0f, &ang);
+void my_draw() {
+    glUseProgram(renderInfo.shaderInfo.program);
 
-    vec3 camera_pos = { 0.0, 0.0, 0.0 };
-    vec3_sub(&(box.pos), &ang, &camera_pos);
-
-    renderer_set_camera_position(rndr, &camera_pos);
-
-    vec3 new_dir = { 0.0, 0.0, 0.0 };
-    vec3_sub(&(box.pos), renderer_camera_position(rndr), &new_dir);
-    vec3_normalize(&new_dir, &new_dir);
-
-    renderer_set_camera_dir(rndr, &new_dir);
-
-    vec3 up = { 0.0, 1.0, 0.0 };
-    renderer_set_camera_up(rndr, &up);
-    renderer_set_camera_fov(rndr, 90.0f);
-    renderer_set_camera_near(rndr, 0.1f);
-    renderer_set_camera_far(rndr, 1000.0);
-
-    glUseProgram(rndr->shader->program);
-
-    rendering_context *rc = make_rendering_context(rndr);
-
-    glClearColor(210.0 / 255.0, 230.0 / 255.0, 1.0, 1.0);
+    glClearColor(210.f / 255.f, 230.f / 255.f, 1.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    renderer_start_rendering(rndr, rc);
-
-    vec4 color = { 0.8, 0.4, 0.2, 1.0 };
-    rendering_context_set_uniform_vec4(rc, "vecColor", &color);
-
-    vec3 player_shift_min = { 0.5f, 0.0f, 0.5f };
-    vec3 player_shift_max = { 0.5f, 2.0f, 0.5f };
-    vec3 player_pos_min; vec3_sub(&box.pos, &player_shift_min, &player_pos_min);
-    vec3 player_pos_max; vec3_add(&box.pos, &player_shift_max, &player_pos_max);
-
-    rendering_context_render_box(rc, &player_pos_min, &player_pos_max);
-
-    vec4 color2 = { 0.3, 0.9, 0.5, 1.0 };
-    vec3 box_temp_pos = { 6.0f, 0.0f, 4.0f };
-    vec3 box_shift_min = { 0.5f, 0.0f, 0.5f };
-    vec3 box_shift_max = { 0.5f, 1.0f, 0.5f };
-    vec3 box_pos_min; vec3_sub(&box_temp_pos, &box_shift_min, &box_pos_min);
-    vec3 box_pos_max; vec3_add(&box_temp_pos, &box_shift_max, &box_pos_max);
-
-    rendering_context_set_uniform_vec4(rc, "vecColor", &color2);
-    rendering_context_render_box(rc, &box_pos_min, &box_pos_max);
-
-    static vec4 color3 = { 0.6, 0.7, 0.9, 1.0 };
-
-    static float verts[] = {
-        -30.0, 0.0, -30.0, 1.0, 1.0, 1.0,
-        -30.0, 0.0,  30.0, 1.0, 1.0, 1.0,
-        30.0, 0.0,  30.0, 1.0, 1.0, 1.0,
-        30.0, 0.0, -30.0, 1.0, 1.0, 1.0
-    };
-
-    rendering_context_set_uniform_vec4(rc, "vecColor", &color3);
-    rendering_context_begin_render_tri_fan(rc);
-    rendering_context_render_tri_face(rc, verts, sizeof(verts) / sizeof(float) / 6.0);
-    rendering_context_end_render(rc);
-
-    renderer_finish_rendering(rndr, rc);
-
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-#if defined(_WIN32)
+#if defined(_WIN32) && 0
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR     lpCmdLine,
 	int       nCmdShow ) {
 #else
@@ -200,26 +43,30 @@ int main(int argc, char** argv) {
 
     SDL_GetCurrentDisplayMode(0, &info);
 
-    application = (app*)malloc(sizeof(app));
-    application->w = info.w;
-    application->h = info.h;
+	renderInfo.width = (unsigned int)info.w;
+	renderInfo.height = (unsigned int)info.h;
 
-    printf("w %d, h %d\n", application->w, application->h);
+    printf("w %d, h %d\n", info.w, info.h);
 
     /* Setup OpenGL 3.2 Context For OS X */
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+#if defined(__APPLE_CC__)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+#else 
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+#endif
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,8);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
     /* Create a fullscreen window */
     SDL_Window *screen = SDL_CreateWindow("MFGD",
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
-                                          1680, 1050,
+                                          1280, 720,
                                           SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_OPENGL);
 
     SDL_SetRelativeMouseMode(true);
@@ -263,77 +110,35 @@ int main(int argc, char** argv) {
              version,
              glsl_ver );
 
-    box.gravity.y = -25.0f;
-    box.speed = 100.0f;
+	init_shader(&renderInfo.shaderInfo, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
+	shader_compile(&renderInfo.shaderInfo);
 
-    GLuint vao;
-    glGenVertexArrays( 1, &vao );
-    glBindVertexArray( vao );
+    glGenVertexArrays( 1, &renderInfo.shaderInfo.vao);
+    glBindVertexArray(renderInfo.shaderInfo.vao);
 
-    shader *s = make_shader("model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
-    shader_compile(s);
-
-    int w, h;
-    get_screen_size(&w, &h);
-    struct s_renderer *r = make_renderer(w, h);
-    renderer_initialize(r);
-
-    /* hook renderer up with our shader prog */
-    r->shader = s;
-
-    glEnable(GL_DEPTH_TEST);
     uint32_t old = SDL_GetTicks();
     uint32_t now = SDL_GetTicks();
     int pause = 0;
     while(true) {
         SDL_Event event;
         int quit = 0;
-        int rel_x; int rel_y;
+        int rel_x, rel_y;
 
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_KEYDOWN:
-                if (event.key.keysym.sym == SDLK_p)
-                    pause = 1;
-                if (event.key.keysym.sym == SDLK_w)
-                   box.movement_goal.x = box.speed;
-                if (event.key.keysym.sym == SDLK_a)
-                    box.movement_goal.z = box.speed;
-                if (event.key.keysym.sym == SDLK_s)
-                    box.movement_goal.x = -box.speed;
-                if (event.key.keysym.sym == SDLK_d)
-                    box.movement_goal.z = -box.speed;
-                if (event.key.keysym.sym == SDLK_SPACE && !box.jumping) {
-                    box.velocity.y = 10.0f;
-                    box.jumping = 1;
-                }
+				if (event.key.keysym.sym == SDLK_ESCAPE) quit = 1;
                 break;
             case SDL_KEYUP:
-                if (event.key.keysym.sym == SDLK_p)
-                    pause = 0;
-                if (event.key.keysym.sym == SDLK_ESCAPE)
-                    quit = 1;
-                if (event.key.keysym.sym == SDLK_w)
-                    box.movement_goal.x = 0.0f;
-                if (event.key.keysym.sym == SDLK_a)
-                    box.movement_goal.z = 0.0f;
-                if (event.key.keysym.sym == SDLK_s)
-                    box.movement_goal.x = 0.0f;
-                if (event.key.keysym.sym == SDLK_d)
-                    box.movement_goal.z = 0.0f;
-                if (event.key.keysym.sym == SDLK_r)
-                    box.pos.x = box.pos.y = box.pos.z = 0.0f;
                 break;
             case SDL_MOUSEMOTION:
                 SDL_GetRelativeMouseState(&rel_x, &rel_y);
-                my_mouse_move(&box, rel_x, rel_y);
                 break;
             case SDL_QUIT:
                 quit = 1;
                 break;
             }
         }
-
 
         if (quit == 1) // if received instruction to quit
             break;
@@ -343,23 +148,21 @@ int main(int argc, char** argv) {
             now = SDL_GetTicks();
         }
 
-        float dt = now - old;
+        float dt = (float)(now - old);
 
         if( dt > 16.0f) {
             dt = 16.0f;
         }
 
         update(dt);
-        my_draw(r);
+        my_draw();
         SDL_GL_SwapWindow(screen);
 
     }
 
-    shader_cleanup(s);
-    glDeleteVertexArrays(1, &vao);
-
-    free(r);
-
+	glDeleteVertexArrays(1, &renderInfo.shaderInfo.vao);
+    shader_cleanup(&renderInfo.shaderInfo);
+	
     SDL_GL_DeleteContext(opengl_context);
     SDL_DestroyWindow(screen);
     SDL_Quit();

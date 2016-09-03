@@ -1,5 +1,10 @@
 #include "utils.h"
 
+#if !defined(_WIN32)
+#include <unistd.h>
+#endif
+#include <SDL.h>
+
 float approach(float goal, float current, float dt) {
     float diff = goal - current;
 
