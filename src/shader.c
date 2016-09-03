@@ -41,9 +41,6 @@ void shader_cleanup(shader* s) {
     glDeleteShader(s->vertex_shader);
     glDeleteShader(s->fragment_shader);
     glDeleteProgram(s->program);
-
-    free(s);
-    s = NULL;
 }
 
 char *read_shader(const char* path, ssize_t *size) {
