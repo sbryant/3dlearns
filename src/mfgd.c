@@ -116,7 +116,6 @@ int main(int argc, char** argv) {
     glGenVertexArrays( 1, &renderInfo.shaderInfo.vao);
     glBindVertexArray(renderInfo.shaderInfo.vao);
 
-    glEnable(GL_DEPTH_TEST);
     uint32_t old = SDL_GetTicks();
     uint32_t now = SDL_GetTicks();
     int pause = 0;
