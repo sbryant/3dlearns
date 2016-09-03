@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
     SDL_Window *screen = SDL_CreateWindow("MFGD",
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
-                                          1680, 1050,
+                                          1280, 720,
                                           SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_OPENGL);
 
     SDL_SetRelativeMouseMode(true);
