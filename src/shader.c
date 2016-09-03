@@ -148,6 +148,7 @@ void shader_compile(shader *s) {
     /* Some ATI cards need this. */
     glBindAttribLocation(program, 0, "in_position");
 	glBindAttribLocation(program, 1, "in_color");
+	glBindFragDataLocation(program, 0, "outColor");
     glAttachShader(program, vert_shader);
     glAttachShader(program, frag_shader);
     glLinkProgram(program);
@@ -172,7 +173,4 @@ void shader_compile(shader *s) {
 
     s->pos_attr = glGetAttribLocation( s->program, "in_position" );
     s->color_attr = glGetAttribLocation( s->program, "in_color" );
-
-    glBindFragDataLocation( s->program, 0, "outColor" );
-
 }
