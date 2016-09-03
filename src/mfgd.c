@@ -160,9 +160,9 @@ int main(int argc, char** argv) {
 
     }
 
+	glDeleteVertexArrays(1, &renderInfo.shaderInfo.vao);
     shader_cleanup(&renderInfo.shaderInfo);
-    glDeleteVertexArrays(1, &vao);
-
+	
     SDL_GL_DeleteContext(opengl_context);
     SDL_DestroyWindow(screen);
     SDL_Quit();
