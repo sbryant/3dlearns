@@ -144,6 +144,20 @@ void shader_compile(shader *s) {
     glAttachShader(program, frag_shader);
     glLinkProgram(program);
 
+	{
+		int status;  glGetShaderiv(frag_shader, GL_LINK_STATUS, &status);
+
+		if (status == GL_FALSE) {
+			int bufferSize, cpySize; glGetShaderiv(vert_shader, GL_INFO_LOG_LENGTH, &bufferSize);
+			char* buffer = (char*)malloc(bufferSize + 1);
+			glGetShaderInfoLog(frag_shader, bufferSize, &cpySize, buffer);
+			buffer[bufferSize] = '\0';
+			fprintf(stderr, "The shader linker info log:\n%s\n", buffer);
+			fflush(stderr);
+			free(buffer);
+		}
+	}
+
     s->program = program;
     s->vertex_shader = vert_shader;
     s->fragment_shader = frag_shader;
