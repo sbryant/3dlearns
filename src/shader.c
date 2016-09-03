@@ -20,10 +20,10 @@
 #include <STB.h>
 
 shader *make_shader(const char* name, const char* vertex_path, const char* frag_path) {
-    shader *s = (shader*)calloc(1, sizeof(*s));
+	shader *s = (shader*)calloc(1, sizeof(*s));
 
 	init_shader(s, name, vertex_path, frag_path);
-    return s;
+	return s;
 }
 
 void init_shader(shader* s, const char* name, const char* vertex_path, const char* frag_path) {
@@ -36,71 +36,71 @@ void init_shader(shader* s, const char* name, const char* vertex_path, const cha
 }
 
 void shader_cleanup(shader* s) {
-    glDetachShader(s->program, s->vertex_shader);
-    glDetachShader(s->program, s->fragment_shader);
-    glDeleteShader(s->vertex_shader);
-    glDeleteShader(s->fragment_shader);
-    glDeleteProgram(s->program);
+	glDetachShader(s->program, s->vertex_shader);
+	glDetachShader(s->program, s->fragment_shader);
+	glDeleteShader(s->vertex_shader);
+	glDeleteShader(s->fragment_shader);
+	glDeleteProgram(s->program);
 }
 
 char *read_shader(const char* path, ssize_t *size) {
 #if defined(_WIN32)
-  char shader_path[MAX_PATH] = {0};
+	char shader_path[MAX_PATH] = { 0 };
 
-  char* cpath = _strdup(path);
-  char* c = NULL;
-  while (c = strchr(cpath, '/')) {
-	  *c = '\\';
-  }
+	char* cpath = _strdup(path);
+	char* c = NULL;
+	while (c = strchr(cpath, '/')) {
+		*c = '\\';
+	}
 
-  _fullpath(shader_path, cpath, MAX_PATH);
+	_fullpath(shader_path, cpath, MAX_PATH);
 
-  HANDLE file_handle =  CreateFile(shader_path, GENERIC_READ, FILE_SHARE_READ, NULL,
-                        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE file_handle = CreateFile(shader_path, GENERIC_READ, FILE_SHARE_READ, NULL,
+		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
-  if (file_handle == INVALID_HANDLE_VALUE) {
-	  long error = GetLastError();
-	  return NULL;
-  }
+	if (file_handle == INVALID_HANDLE_VALUE) {
+		long error = GetLastError();
+		return NULL;
+	}
 
-  LARGE_INTEGER lsize;
-  GetFileSizeEx(file_handle, &lsize);
-  *size = lsize.LowPart;
-  char* buffer = (char*)malloc(*size + 1);
-  ReadFile(file_handle, buffer, (long)(*size), NULL, NULL);
-  buffer[*size] = '\0';
+	LARGE_INTEGER lsize;
+	GetFileSizeEx(file_handle, &lsize);
+	*size = lsize.LowPart;
+	char* buffer = (char*)malloc(*size + 1);
+	ReadFile(file_handle, buffer, (long)(*size), NULL, NULL);
+	buffer[*size] = '\0';
 	CloseHandle(file_handle);
 	return buffer;
 #else
-    int fd = open(path, O_RDONLY);
-    struct stat sb;
-    char *addr = NULL;
-    fstat(fd, &sb);
-    addr = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-    close(fd);
-    *size = sb.st_size;
-    return addr;
+	int fd = open(path, O_RDONLY);
+	struct stat sb;
+	char *addr = NULL;
+	fstat(fd, &sb);
+	addr = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	close(fd);
+	*size = sb.st_size;
+	return addr;
 #endif
 }
 
 void free_shader(char *addr) {
 #if defined(_WIN32)
-  free(addr);
+	free(addr);
 #else
-  munmap(addr, size);
+	munmap(addr, size);
 #endif
 }
 
 void shader_compile(shader *s) {
-    assert(s != NULL);
+	assert(s != NULL);
 
-    GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
-    ssize_t vert_size;
-    char* vert_source = read_shader(s->vertex_path, &vert_size);
+	GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
+	ssize_t vert_size;
+	char* vert_source = read_shader(s->vertex_path, &vert_size);
 
-    assert(vert_source != NULL);
-    glShaderSource(vert_shader, 1, (const GLchar**)&vert_source, NULL);
-    glCompileShader(vert_shader);
+	assert(vert_source != NULL);
+	glShaderSource(vert_shader, 1, (const GLchar**)&vert_source, NULL);
+	glCompileShader(vert_shader);
 	free_shader(vert_source);
 
 	{
@@ -117,13 +117,13 @@ void shader_compile(shader *s) {
 		}
 	}
 
-    GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    ssize_t frag_size;
-    GLchar* frag_source = (GLchar*)read_shader(s->fragment_path, &frag_size);
-    assert(frag_source != NULL);
+	GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
+	ssize_t frag_size;
+	GLchar* frag_source = (GLchar*)read_shader(s->fragment_path, &frag_size);
+	assert(frag_source != NULL);
 
-    glShaderSource(frag_shader, 1, (const GLchar**)&frag_source, NULL);
-    glCompileShader(frag_shader);
+	glShaderSource(frag_shader, 1, (const GLchar**)&frag_source, NULL);
+	glCompileShader(frag_shader);
 	free_shader(frag_source);
 
 	{
@@ -140,15 +140,15 @@ void shader_compile(shader *s) {
 		}
 	}
 
-    GLuint program = glCreateProgram();
+	GLuint program = glCreateProgram();
 
-    /* Some ATI cards need this. */
-    glBindAttribLocation(program, 0, "in_position");
+	/* Some ATI cards need this. */
+	glBindAttribLocation(program, 0, "in_position");
 	glBindAttribLocation(program, 1, "in_color");
 	glBindFragDataLocation(program, 0, "outColor");
-    glAttachShader(program, vert_shader);
-    glAttachShader(program, frag_shader);
-    glLinkProgram(program);
+	glAttachShader(program, vert_shader);
+	glAttachShader(program, frag_shader);
+	glLinkProgram(program);
 
 	{
 		int status;  glGetShaderiv(frag_shader, GL_LINK_STATUS, &status);
@@ -164,10 +164,10 @@ void shader_compile(shader *s) {
 		}
 	}
 
-    s->program = program;
-    s->vertex_shader = vert_shader;
-    s->fragment_shader = frag_shader;
+	s->program = program;
+	s->vertex_shader = vert_shader;
+	s->fragment_shader = frag_shader;
 
-    s->pos_attr = glGetAttribLocation( s->program, "in_position" );
-    s->color_attr = glGetAttribLocation( s->program, "in_color" );
+	s->pos_attr = glGetAttribLocation(s->program, "in_position");
+	s->color_attr = glGetAttribLocation(s->program, "in_color");
 }
