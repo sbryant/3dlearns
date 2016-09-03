@@ -8,8 +8,7 @@
 #include <SDL.h>
 #undef main
 
-#include "matrix.h"
-#include "vector.h"
+#include "linmath.h"
 #include "utils.h"
 #include "renderer.h"
 #include "shader.h"
@@ -21,7 +20,7 @@ void my_draw(renderer *rndr) {
 
     glUseProgram(rndr->shader->program);
 
-    glClearColor(210.0 / 255.0, 230.0 / 255.0, 1.0, 1.0);
+    glClearColor(210.f / 255.f, 230.f / 255.f, 1.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -113,11 +112,15 @@ int main(int argc, char** argv) {
 
     int w, h;
     get_screen_size(&w, &h);
-    struct s_renderer *r = make_renderer(w, h);
-    renderer_initialize(r);
+	struct s_renderer r = {
+		.width = w,
+		.height = h
+	};
+
+	renderer_init(&r);
 
     /* hook renderer up with our shader prog */
-    r->shader = s;
+    r.shader = s;
 
     glEnable(GL_DEPTH_TEST);
     uint32_t old = SDL_GetTicks();
@@ -144,7 +147,6 @@ int main(int argc, char** argv) {
             }
         }
 
-
         if (quit == 1) // if received instruction to quit
             break;
 
@@ -153,22 +155,20 @@ int main(int argc, char** argv) {
             now = SDL_GetTicks();
         }
 
-        float dt = now - old;
+        float dt = (float)(now - old);
 
         if( dt > 16.0f) {
             dt = 16.0f;
         }
 
         update(dt);
-        my_draw(r);
+        my_draw(&r);
         SDL_GL_SwapWindow(screen);
 
     }
 
     shader_cleanup(s);
     glDeleteVertexArrays(1, &vao);
-
-    free(r);
 
     SDL_GL_DeleteContext(opengl_context);
     SDL_DestroyWindow(screen);

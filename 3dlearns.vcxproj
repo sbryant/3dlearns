@@ -149,19 +149,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\matrix.c" />
     <ClCompile Include="src\mfgd.c" />
     <ClCompile Include="src\renderer.c" />
     <ClCompile Include="src\shader.c" />
     <ClCompile Include="src\utils.c" />
-    <ClCompile Include="src\vector.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\matrix.h" />
+    <ClInclude Include="src\linmath.h" />
     <ClInclude Include="src\renderer.h" />
     <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\utils.h" />
-    <ClInclude Include="src\vector.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\simple_frag.glsl" />
