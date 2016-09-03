@@ -1,18 +1,12 @@
-MFGD
-====
-
 :warning: DOES NOT WORK :warning:
 
-Learning to 3d by doing and porting.
+Learning to 3d by doing and porting. Simple OpenGL 4.5 context with SDL2 and
+GLEW 2 for cross platform Window and extension management.
 
-The Math For Game Developer's series engine structure was easy enough to lift.
-There were some modifications though:
+This project will try and still to C because it's an itch I want to scratch.
 
-- 100% C
-- Based on OpenGL 3.2 (latest in OS X 10.8)
-  - Forces VBO management. (needs more work)
-- SDL
-- GLEW - to load extensions.
-  - This makes error rotines useless due to a bug :(
-- Backed by my horrible math library
-  -  most of the learning goes here.
+There is no real aim other than a simple starting point for getting pixels to
+the screen with a modern OpenGL pipeline.
+
+Currently the only thing this program does is render a triangle and will exit
+once the escape is pressed.
