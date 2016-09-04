@@ -32,6 +32,16 @@ void shader_cleanup(shader* s) {
 	glDeleteProgram(s->program);
 }
 
+void shader_use(shader* s)
+{
+	if (s == NULL) {
+		glUseProgram(0);
+		return;
+	}
+
+	glUseProgram(s->program);
+}
+
 char *read_shader(const char* path, ssize_t *size) {
 #if defined(_WIN32)
 	char shader_path[MAX_PATH] = { 0 };

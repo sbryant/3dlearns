@@ -25,11 +25,10 @@ void update(float dt) {
 }
 
 void my_draw() {
-	glUseProgram(renderInfo.shaderInfo.program);
-
 	glClearColor(210.f / 255.f, 230.f / 255.f, 1.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	shader_use(&renderInfo.shaderInfo);
 	glBindVertexArray(renderInfo.vao);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
