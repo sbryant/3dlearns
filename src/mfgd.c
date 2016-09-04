@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 	/* Create a fullscreen window */
-	SDL_Window *screen = SDL_CreateWindow("MFGD",
+	SDL_Window *screen = SDL_CreateWindow("OpenGL",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
 		1280, 720,
