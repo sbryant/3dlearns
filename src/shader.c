@@ -22,24 +22,13 @@
 shader *make_shader(const char* name, const char* vertex_path, const char* frag_path) {
 	shader *s = (shader*)calloc(1, sizeof(*s));
 
-	init_shader(s, name, vertex_path, frag_path);
+	shader_compile(s, name, vertex_path, frag_path);
 	return s;
 }
 
-void init_shader(shader* s, const char* name, const char* vertex_path, const char* frag_path) {
-	assert(s != NULL);
 
-	/* cheat for now, copy later */
-	strcpy_s(s->program_name, sizeof(s->program_name), name);
-	strcpy_s(s->vertex_path, sizeof(s->vertex_path), vertex_path);
-	strcpy_s(s->fragment_path, sizeof(s->fragment_path), frag_path);
-}
 
 void shader_cleanup(shader* s) {
-	glDetachShader(s->program, s->vertex_shader);
-	glDetachShader(s->program, s->fragment_shader);
-	glDeleteShader(s->vertex_shader);
-	glDeleteShader(s->fragment_shader);
 	glDeleteProgram(s->program);
 }
 
@@ -91,12 +80,14 @@ void free_shader(char *addr) {
 #endif
 }
 
-void shader_compile(shader *s) {
+void shader_compile(shader* s, const char* name, const char* vertex_path, const char* frag_path) {
 	assert(s != NULL);
+
+	strcpy_s(s->program_name, sizeof(s->program_name), name);
 
 	GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
 	ssize_t vert_size;
-	char* vert_source = read_shader(s->vertex_path, &vert_size);
+	char* vert_source = read_shader(vertex_path, &vert_size);
 
 	assert(vert_source != NULL);
 	glShaderSource(vert_shader, 1, (const GLchar**)&vert_source, NULL);
@@ -119,7 +110,7 @@ void shader_compile(shader *s) {
 
 	GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
 	ssize_t frag_size;
-	GLchar* frag_source = (GLchar*)read_shader(s->fragment_path, &frag_size);
+	GLchar* frag_source = (GLchar*)read_shader(frag_path, &frag_size);
 	assert(frag_source != NULL);
 
 	glShaderSource(frag_shader, 1, (const GLchar**)&frag_source, NULL);
@@ -164,10 +155,8 @@ void shader_compile(shader *s) {
 		}
 	}
 
-	s->program = program;
-	s->vertex_shader = vert_shader;
-	s->fragment_shader = frag_shader;
+	glDeleteShader(vert_shader);
+	glDeleteShader(frag_shader);
 
-	s->pos_attr = glGetAttribLocation(s->program, "in_position");
-	s->color_attr = glGetAttribLocation(s->program, "in_color");
+	s->program = program;
 }

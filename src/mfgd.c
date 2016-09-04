@@ -16,6 +16,7 @@
 struct s_RenderInfo {
 	shader shaderInfo;
 	unsigned int width, height;
+	int vao;
 };
 
 static struct s_RenderInfo renderInfo = { 0 };
@@ -29,7 +30,7 @@ void my_draw() {
 	glClearColor(210.f / 255.f, 230.f / 255.f, 1.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glBindVertexArray(renderInfo.shaderInfo.vao);
+	glBindVertexArray(renderInfo.vao);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
@@ -111,10 +112,9 @@ int main(int argc, char** argv) {
 		version,
 		glsl_ver);
 
-	init_shader(&renderInfo.shaderInfo, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
-	shader_compile(&renderInfo.shaderInfo);
+	shader_compile(&renderInfo.shaderInfo, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
 
-	glGenVertexArrays(1, &renderInfo.shaderInfo.vao);
+	glGenVertexArrays(1, &renderInfo.vao);
 	
 	uint32_t old = SDL_GetTicks();
 	uint32_t now = SDL_GetTicks();
@@ -159,7 +159,7 @@ int main(int argc, char** argv) {
 		SDL_GL_SwapWindow(screen);
 	}
 
-	glDeleteVertexArrays(1, &renderInfo.shaderInfo.vao);
+	glDeleteVertexArrays(1, &renderInfo.vao);
 	shader_cleanup(&renderInfo.shaderInfo);
 
 	SDL_GL_DeleteContext(opengl_context);
