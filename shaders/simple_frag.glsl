@@ -1,8 +1,12 @@
-#version 450
+#version 450 core
 
 layout(location = 0) in vec4 color;
+layout(location = 1) in vec2 texCoords;
 layout(location = 0) out vec4 outColor;
 
+uniform sampler2D tex;
+
 void main() {
-    outColor = color;
+	vec4 c = texture(tex, texCoords);
+    outColor = vec4(c.rrr, 1.0 - c.r);
 }

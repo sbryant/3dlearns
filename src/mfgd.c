@@ -2,6 +2,15 @@
 #include <Windows.h>
 #endif
 
+#define STB_DEFINE 
+#define STBI_PNG_ONLY
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_TRUETYPE_IMPLEMENTATION
+
+#include "stb.h"
+#include "stb_image.h"
+#include "stb_truetype.h"
+
 #include <glew.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -12,6 +21,123 @@
 #include "utils.h"
 #include "shader.h"
 
+struct sb_debug_file_read_result {
+	long size;
+	void* data;
+};
+
+static struct sb_debug_file_read_result* debug_read_entire_file(const char* path) {
+	struct sb_debug_file_read_result* read_result = calloc(1, sizeof(*read_result));
+
+	HANDLE file_handle = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, NULL,
+		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	if (file_handle == INVALID_HANDLE_VALUE) {
+		long error = GetLastError();
+		return NULL;
+	}
+
+	LARGE_INTEGER file_size = { 0 };
+	GetFileSizeEx(file_handle, &file_size);
+	read_result->size = file_size.QuadPart;
+
+	fprintf(stderr, "%s has a file size of: %d bytes\n", path, read_result->size);
+
+	read_result->data = malloc(read_result->size);
+	long bytes_read = 0;
+	ReadFile(file_handle, read_result->data, read_result->size, &bytes_read, NULL);
+	fprintf(stderr, "read %d bytes / %d bytes\n", bytes_read, read_result->size);
+	fflush(stderr);
+
+	CloseHandle(file_handle);
+
+	return read_result;
+}
+
+#define BITMAP_BYTES_PER_PIXEL 1
+
+struct sb_bitmap {
+	void* data;
+	int width, height;
+	int pitch;
+};
+
+struct sb_bitmap* make_empty_bitmap(int width, int height, int zero) {
+	assert(height != 0.0f && "Height needs to be greater than zero");
+
+	struct sb_bitmap* bitmap;
+
+	if (zero == 1)
+		bitmap = calloc(1, sizeof(*bitmap));
+	else
+		bitmap = calloc(1, sizeof(*bitmap));
+
+	/* good values */
+	bitmap->width = width;
+	bitmap->height = height;
+	bitmap->pitch = BITMAP_BYTES_PER_PIXEL;
+
+	int bitmap_size = height * width * BITMAP_BYTES_PER_PIXEL;
+
+	if (zero == 1)
+		bitmap->data = (void*)calloc(1, bitmap_size);
+	else 
+		bitmap->data = (void*)malloc(bitmap_size);
+
+	return bitmap;
+}
+
+static stbtt_bakedchar cdata[96];
+
+static struct sb_bitmap* sb_bitmap_font() {
+	const char* font_file_path = "C:/Windows/Fonts/arial.ttf";
+	struct sb_debug_file_read_result* font_file = debug_read_entire_file(font_file_path);
+
+	stbtt_fontinfo font;
+	uint8_t* data = (uint8_t*)(font_file->data);
+	stbtt_InitFont(&font, data, stbtt_GetFontOffsetForIndex(data, 0));
+
+	int ascent, descent, line_gap, x = 0;
+	stbtt_GetFontVMetrics(&font, &ascent, &descent, &line_gap);
+
+	float scale = stbtt_ScaleForPixelHeight(&font, 60);
+	ascent *= scale;
+	struct sb_bitmap* bitmap = make_empty_bitmap(1024, 1024, 1);
+
+	const char* baked_string = "stb_truetype demo";
+	char* ptr = baked_string;
+
+	while (*ptr) {
+		char c = *ptr;
+		int x1, y1, x2, y2;
+		stbtt_GetCodepointBitmapBox(&font, c, scale, scale, &x1, &y1, &x2, &y2);
+
+		float y = ascent + y1;
+
+		int byte_offset = x + y * 1024;
+
+		stbtt_MakeCodepointBitmap(&font, (uint8_t*)bitmap->data + byte_offset, x2 - x1, y2 - y1, 1024, scale, scale, c);
+
+		int ax;
+		stbtt_GetCodepointHMetrics(&font, c, &ax, NULL);
+		x += ax * scale;
+
+		ptr++;
+
+		/* advance kerning n-1 times */
+		if (*ptr) {
+			int kern = stbtt_GetCodepointKernAdvance(&font, c, *ptr);
+			x += kern * scale;
+		}
+	}
+	return bitmap;
+}
+
+static void sb_bitmap_free(struct sb_bitmap* font) {
+	assert(font != NULL && font->data != NULL && "Font and Font data need to be valid pointers");
+	free(font->data);
+	free(font);
+}
 
 struct s_RenderInfo {
 	shader shaderInfo;
@@ -30,7 +156,7 @@ void my_draw() {
 
 	shader_use(&renderInfo.shaderInfo);
 	glBindVertexArray(renderInfo.vao);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 #if defined(_WIN32) && 0
@@ -39,6 +165,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR     lpC
 #else
 int main(int argc, char** argv) {
 #endif
+
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_DisplayMode info;
 
@@ -114,7 +241,44 @@ int main(int argc, char** argv) {
 	shader_compile(&renderInfo.shaderInfo, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
 
 	glGenVertexArrays(1, &renderInfo.vao);
+	glBindVertexArray(renderInfo.vao);
+	int tex; glGenTextures(1, &tex);
+
+	/* generate bitmap font texture */
+	struct sb_bitmap* font = sb_bitmap_font();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
+	glGenerateMipmap(GL_TEXTURE_2D);
 	
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, font->width, font->height, 0, GL_RED, GL_UNSIGNED_BYTE, font->data);
+
+	int vbo; glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+	const float vertices[] =
+	{
+	/*	 x     y	 z	 s  t  */
+		-0.5,  0.5,  0,  0, 0,
+		 0.5,  0.5,  0,  1, 0,
+		 0.5, -0.5,  0,  1, 1,
+		 0.5, -0.5,  0,  1, 1,
+		-0.5, -0.5,  0,  0, 1,
+		-0.5,  0.5,  0,  0, 0
+	};
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	int pos_attr = glGetAttribLocation(renderInfo.shaderInfo.program, "in_position");
+	int uv_attr = glGetAttribLocation(renderInfo.shaderInfo.program, "in_tex");
+
+	glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+	glEnableVertexAttribArray(pos_attr);
+
+	glVertexAttribPointer(uv_attr, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(uv_attr);
+
 	uint32_t old = SDL_GetTicks();
 	uint32_t now = SDL_GetTicks();
 	int pause = 0;
@@ -158,6 +322,10 @@ int main(int argc, char** argv) {
 		SDL_GL_SwapWindow(screen);
 	}
 
+	sb_bitmap_free(font);
+
+	glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &renderInfo.vao);
 	glDeleteVertexArrays(1, &renderInfo.vao);
 	shader_cleanup(&renderInfo.shaderInfo);
 
