@@ -26,8 +26,6 @@ shader *make_shader(const char* name, const char* vertex_path, const char* frag_
 	return s;
 }
 
-
-
 void shader_cleanup(shader* s) {
 	glDeleteProgram(s->program);
 }
@@ -53,6 +51,7 @@ char *read_shader(const char* path, ssize_t *size) {
 	}
 
 	_fullpath(shader_path, cpath, MAX_PATH);
+	free(cpath);
 
 	HANDLE file_handle = CreateFile(shader_path, GENERIC_READ, FILE_SHARE_READ, NULL,
 		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -82,8 +81,9 @@ char *read_shader(const char* path, ssize_t *size) {
 #endif
 }
 
-void free_shader(char *addr) {
+void free_shader(char *addr, ssize_t size) {
 #if defined(_WIN32)
+	(void)size;
 	free(addr);
 #else
 	munmap(addr, size);
@@ -102,7 +102,7 @@ void shader_compile(shader* s, const char* name, const char* vertex_path, const 
 	assert(vert_source != NULL);
 	glShaderSource(vert_shader, 1, (const GLchar**)&vert_source, NULL);
 	glCompileShader(vert_shader);
-	free_shader(vert_source);
+	free_shader(vert_source, vert_size);
 
 	{
 		int status;  glGetShaderiv(vert_shader, GL_COMPILE_STATUS, &status);
@@ -125,7 +125,7 @@ void shader_compile(shader* s, const char* name, const char* vertex_path, const 
 
 	glShaderSource(frag_shader, 1, (const GLchar**)&frag_source, NULL);
 	glCompileShader(frag_shader);
-	free_shader(frag_source);
+	free_shader(frag_source, frag_size);
 
 	{
 		int status;  glGetShaderiv(frag_shader, GL_COMPILE_STATUS, &status);
