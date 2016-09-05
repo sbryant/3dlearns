@@ -59,68 +59,17 @@ static stbtt_bakedchar cdata[128];
 #define BITMAP_WIDTH 2048
 #define BITMAP_HEIGHT 2048
 
-static struct sb_bitmap* sb_bitmap_font() {
+static struct sb_bitmap* sb_bitmap_font(width, height) {
 	const char* font_file_path = "C:/Windows/Fonts/cour.ttf";
 	struct sb_debug_file_read_result* font_file = debug_read_entire_file(font_file_path);
+	struct sb_bitmap* bitmap = make_empty_bitmap(width, height, 1);
 
 	stbtt_fontinfo font;
 	uint8_t* data = (uint8_t*)(font_file->data);
-	stbtt_InitFont(&font, data, stbtt_GetFontOffsetForIndex(data, 0));
 
-	int ascent, descent, line_gap, x = 0;
-	stbtt_GetFontVMetrics(&font, &ascent, &descent, &line_gap);
+	/* gets all characters from ! - ~ (includes a-Z 0-9) */
+	stbtt_BakeFontBitmap(data, 0, 256.0, bitmap->data, bitmap->width, bitmap->height, '!', ('~' - '!')+1, &cdata[0]);
 
-	float scale = stbtt_ScaleForPixelHeight(&font, 64);
-	ascent *= scale;
-	struct sb_bitmap* bitmap = make_empty_bitmap(BITMAP_WIDTH, BITMAP_HEIGHT, 1);
-
-	for (char c = '!'; c <= '~'; ++c) {
-		int x1, y1, x2, y2;
-		stbtt_GetCodepointBitmapBox(&font, c, scale, scale, &x1, &y1, &x2, &y2);
-
-		float y = ascent + y1;
-
-		int byte_offset = x + y * BITMAP_WIDTH;
-
-		stbtt_MakeCodepointBitmap(&font, (uint8_t*)bitmap->data + byte_offset, x2 - x1, y2 - y1, BITMAP_WIDTH, scale, scale, c);
-
-		int ax;
-		stbtt_GetCodepointHMetrics(&font, c, &ax, NULL);
-		x += ax * scale;
-		/* advance kerning n-1 times */
-		char next = c + 1;
-		if (next < '~') {
-			int kern = stbtt_GetCodepointKernAdvance(&font, c, next);
-			x += kern * scale;
-		}
-	}
-
-	//const char* baked_string = "stb_truetype demo";
-	//char* ptr = baked_string;
-
-	//while (*ptr) {
-	//	char c = *ptr;
-	//	int x1, y1, x2, y2;
-	//	stbtt_GetCodepointBitmapBox(&font, c, scale, scale, &x1, &y1, &x2, &y2);
-
-	//	float y = ascent + y1;
-
-	//	int byte_offset = x + y * BITMAP_WIDTH;
-
-	//	stbtt_MakeCodepointBitmap(&font, (uint8_t*)bitmap->data + byte_offset, x2 - x1, y2 - y1, BITMAP_WIDTH, scale, scale, c);
-
-	//	int ax;
-	//	stbtt_GetCodepointHMetrics(&font, c, &ax, NULL);
-	//	x += ax * scale;
-
-	//	ptr++;
-
-	//	/* advance kerning n-1 times */
-	//	if (*ptr) {
-	//		int kern = stbtt_GetCodepointKernAdvance(&font, c, *ptr);
-	//		x += kern * scale;
-	//	}
-	//}
 	return bitmap;
 }
 
@@ -248,7 +197,7 @@ int main(int argc, char** argv) {
 	int tex; glGenTextures(1, &tex);
 
 	/* generate bitmap font texture */
-	struct sb_bitmap* font = sb_bitmap_font();
+	struct sb_bitmap* font = sb_bitmap_font(2048, 2048);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);
 
