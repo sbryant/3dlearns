@@ -80,7 +80,7 @@ static void sb_bitmap_free(struct sb_bitmap* font) {
 }
 
 struct sb_render_group {
-	shader shaderInfo;
+	shader shader_info;
 	int vao;
 	int vbo;
 	int texture;
@@ -96,10 +96,10 @@ void my_draw() {
 	glClearColor(210.f / 255.f, 230.f / 255.f, 1.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	shader_use(&render_group.shaderInfo);
+	shader_use(&render_group.shader_info);
 	glBindVertexArray(render_group.vao);
 
-	int location = glGetUniformLocation(render_group.shaderInfo.program, "projection");
+	int location = glGetUniformLocation(render_group.shader_info.program, "projection");
 	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)render_group.projection);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -180,7 +180,7 @@ int main(int argc, char** argv) {
 		version,
 		glsl_ver);
 
-	shader_compile(&render_group.shaderInfo, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
+	shader_compile(&render_group.shader_info, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
 
 	mat4x4_identity(&render_group.projection);
 
@@ -223,8 +223,8 @@ int main(int argc, char** argv) {
 	};
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	int pos_attr = glGetAttribLocation(render_group.shaderInfo.program, "in_position");
-	int uv_attr = glGetAttribLocation(render_group.shaderInfo.program, "in_tex");
+	int pos_attr = glGetAttribLocation(render_group.shader_info.program, "in_position");
+	int uv_attr = glGetAttribLocation(render_group.shader_info.program, "in_tex");
 
 	glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
 	glEnableVertexAttribArray(pos_attr);
@@ -280,7 +280,7 @@ int main(int argc, char** argv) {
 	glDeleteBuffers(1, &vbo);
 	glDeleteBuffers(1, &render_group.vao);
 	glDeleteVertexArrays(1, &render_group.vao);
-	shader_cleanup(&render_group.shaderInfo);
+	shader_cleanup(&render_group.shader_info);
 
 	SDL_GL_DeleteContext(opengl_context);
 	SDL_DestroyWindow(screen);
