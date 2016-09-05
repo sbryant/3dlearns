@@ -1,5 +1,7 @@
 #if defined(_WIN32) 
 #include <Windows.h>
+#include <intrin.h>
+#pragma intrinsic(__rdtsc)
 #endif
 
 #define STB_DEFINE 
@@ -86,6 +88,42 @@ struct sb_render_group {
 	int texture;
 	mat4x4 projection;
 };
+
+/* debug performance counters as seen from handemade hero */
+enum sb_debug_cycle_counter_group {
+	SB_DEBUG_CYCLE_COUNTER__UPDATE_AND_RENDER,
+	SB_DEBUG_CYCLE_COUNTER__PROGRAM_SETUP,
+	SB_DEBUG_CYCLE_COUNTER__RENDER_GROUP_RENDER,
+
+	SB_DEBUG_CYCLE_COUNTER_COUNT
+};
+
+struct sb_debug_cycle_counter {
+	uint64_t cycle_count;
+	uint32_t hit_count;
+};
+
+static struct sb_debug_cycle_counter sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUNTER_COUNT] = { 0 };
+
+/* use the enum sb_debug_cycle_counter_group for IDs e.g UPDATE_AND_RENDER */
+#define sb_debug_cycle_begin_timed_block(ID) uint64_t __start_cycle_count__##ID = __rdtsc();
+#define sb_debug_cycle_end_timed_block(ID) sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUNTER__##ID].cycle_count += __rdtsc() - __start_cycle_count__##ID; sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUNTER__##ID].hit_count++;
+#define sb_debug_cycle_end_counted(ID, count) sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUNTER__##ID].cycle_count += __rdtsc() - __start_cycle_count__##ID; sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUNTER__##ID].hit_count += count;
+
+static void sb_debug_cycle_counters_display(void) {
+	fprintf(stderr, "DEBUG CYCLE COUNTERS:\n");
+	for (int i = 0; i < (sizeof(sb_debug_cycle_counters) / sizeof(sb_debug_cycle_counters[0])); ++i) {
+		struct sb_debug_cycle_counter* counter = &sb_debug_cycle_counters[i];
+		if (counter->hit_count) {
+			fprintf(stderr, "%d: %I64ducy %uh %I64ucy/h\n", i, counter->cycle_count,
+				counter->hit_count,
+				counter->cycle_count / counter->hit_count);
+
+			counter->cycle_count = 0;
+			counter->hit_count = 0;
+		}
+	}
+}
 
 static struct sb_render_group render_group = { 0 };
 
@@ -235,7 +273,9 @@ int main(int argc, char** argv) {
 	uint32_t old = SDL_GetTicks();
 	uint32_t now = SDL_GetTicks();
 	int pause = 0;
+
 	while (1) {
+		sb_debug_cycle_begin_timed_block(UPDATE_AND_RENDER);
 		SDL_Event event;
 		int quit = 0;
 		int rel_x, rel_y;
@@ -271,7 +311,11 @@ int main(int argc, char** argv) {
 		}
 
 		update(dt);
+		sb_debug_cycle_end_timed_block(UPDATE_AND_RENDER);
 		my_draw();
+
+		sb_debug_cycle_counters_display();
+
 		SDL_GL_SwapWindow(screen);
 	}
 
