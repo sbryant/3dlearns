@@ -228,7 +228,7 @@ int main(int argc, char** argv) {
 
 	const float vertices[] =
 	{
-	/*	 x     y	 z	 s  t  */
+	/*   x     y     z	 s  t  */
 		-0.5,  0.5,  0,  0, 0,
 		 0.5,  0.5,  0,  1, 0,
 		 0.5, -0.5,  0,  1, 1,
