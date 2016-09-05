@@ -130,13 +130,15 @@ static void sb_bitmap_free(struct sb_bitmap* font) {
 	free(font);
 }
 
-struct s_RenderInfo {
+struct sb_render_group {
 	shader shaderInfo;
-	unsigned int width, height;
 	int vao;
+	int vbo;
+	int texture;
+	mat4x4 projection;
 };
 
-static struct s_RenderInfo renderInfo = { 0 };
+static struct sb_render_group render_group = { 0 };
 
 void update(float dt) {
 }
@@ -145,8 +147,8 @@ void my_draw() {
 	glClearColor(210.f / 255.f, 230.f / 255.f, 1.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	shader_use(&renderInfo.shaderInfo);
-	glBindVertexArray(renderInfo.vao);
+	shader_use(&render_group.shaderInfo);
+	glBindVertexArray(render_group.vao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -161,10 +163,6 @@ int main(int argc, char** argv) {
 	SDL_DisplayMode info;
 
 	SDL_GetCurrentDisplayMode(0, &info);
-
-	renderInfo.width = (unsigned int)info.w;
-	renderInfo.height = (unsigned int)info.h;
-
 	fprintf(stderr, "w %d, h %d\n", info.w, info.h);
 
 	/* Setup OpenGL 3.2 Context For OS X */
@@ -229,10 +227,10 @@ int main(int argc, char** argv) {
 		version,
 		glsl_ver);
 
-	shader_compile(&renderInfo.shaderInfo, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
+	shader_compile(&render_group.shaderInfo, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
 
-	glGenVertexArrays(1, &renderInfo.vao);
-	glBindVertexArray(renderInfo.vao);
+	glGenVertexArrays(1, &render_group.vao);
+	glBindVertexArray(render_group.vao);
 	int tex; glGenTextures(1, &tex);
 
 	/* generate bitmap font texture */
@@ -261,8 +259,8 @@ int main(int argc, char** argv) {
 	};
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	int pos_attr = glGetAttribLocation(renderInfo.shaderInfo.program, "in_position");
-	int uv_attr = glGetAttribLocation(renderInfo.shaderInfo.program, "in_tex");
+	int pos_attr = glGetAttribLocation(render_group.shaderInfo.program, "in_position");
+	int uv_attr = glGetAttribLocation(render_group.shaderInfo.program, "in_tex");
 
 	glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
 	glEnableVertexAttribArray(pos_attr);
@@ -316,9 +314,9 @@ int main(int argc, char** argv) {
 	sb_bitmap_free(font);
 
 	glDeleteBuffers(1, &vbo);
-	glDeleteBuffers(1, &renderInfo.vao);
-	glDeleteVertexArrays(1, &renderInfo.vao);
-	shader_cleanup(&renderInfo.shaderInfo);
+	glDeleteBuffers(1, &render_group.vao);
+	glDeleteVertexArrays(1, &render_group.vao);
+	shader_cleanup(&render_group.shaderInfo);
 
 	SDL_GL_DeleteContext(opengl_context);
 	SDL_DestroyWindow(screen);
