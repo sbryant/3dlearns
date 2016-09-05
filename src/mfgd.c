@@ -56,9 +56,11 @@ struct sb_bitmap* make_empty_bitmap(int width, int height, int zero) {
 }
 
 static stbtt_bakedchar cdata[96];
+#define BITMAP_WIDTH 1024
+#define BITMAP_HEIGHT 1024
 
 static struct sb_bitmap* sb_bitmap_font() {
-	const char* font_file_path = "C:/Windows/Fonts/arial.ttf";
+	const char* font_file_path = "C:/Windows/Fonts/cour.ttf";
 	struct sb_debug_file_read_result* font_file = debug_read_entire_file(font_file_path);
 
 	stbtt_fontinfo font;
@@ -70,7 +72,7 @@ static struct sb_bitmap* sb_bitmap_font() {
 
 	float scale = stbtt_ScaleForPixelHeight(&font, 60);
 	ascent *= scale;
-	struct sb_bitmap* bitmap = make_empty_bitmap(1024, 1024, 1);
+	struct sb_bitmap* bitmap = make_empty_bitmap(BITMAP_WIDTH, BITMAP_HEIGHT, 1);
 
 	const char* baked_string = "stb_truetype demo";
 	char* ptr = baked_string;
@@ -82,9 +84,9 @@ static struct sb_bitmap* sb_bitmap_font() {
 
 		float y = ascent + y1;
 
-		int byte_offset = x + y * 1024;
+		int byte_offset = x + y * BITMAP_WIDTH;
 
-		stbtt_MakeCodepointBitmap(&font, (uint8_t*)bitmap->data + byte_offset, x2 - x1, y2 - y1, 1024, scale, scale, c);
+		stbtt_MakeCodepointBitmap(&font, (uint8_t*)bitmap->data + byte_offset, x2 - x1, y2 - y1, BITMAP_WIDTH, scale, scale, c);
 
 		int ax;
 		stbtt_GetCodepointHMetrics(&font, c, &ax, NULL);
