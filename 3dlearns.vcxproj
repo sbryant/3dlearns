@@ -154,6 +154,7 @@
     <ClCompile Include="src\utils.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="sb_debug.h" />
     <ClInclude Include="src\linmath.h" />
     <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\utils.h" />
