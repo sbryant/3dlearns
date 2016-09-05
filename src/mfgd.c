@@ -167,7 +167,7 @@ int main(int argc, char** argv) {
 		1280, 720,
 		SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_OPENGL);
 
-	SDL_SetRelativeMouseMode(true);
+	SDL_SetRelativeMouseMode(1);
 
 	/* initialize a render context, managed by SDL */
 	SDL_GLContext *opengl_context = SDL_GL_CreateContext(screen);
@@ -252,7 +252,7 @@ int main(int argc, char** argv) {
 	uint32_t old = SDL_GetTicks();
 	uint32_t now = SDL_GetTicks();
 	int pause = 0;
-	while (true) {
+	while (1) {
 		SDL_Event event;
 		int quit = 0;
 		int rel_x, rel_y;
