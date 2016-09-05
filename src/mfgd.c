@@ -55,9 +55,9 @@ struct sb_bitmap* make_empty_bitmap(int width, int height, int zero) {
 	return bitmap;
 }
 
-static stbtt_bakedchar cdata[96];
-#define BITMAP_WIDTH 1024
-#define BITMAP_HEIGHT 1024
+static stbtt_bakedchar cdata[128];
+#define BITMAP_WIDTH 2048
+#define BITMAP_HEIGHT 2048
 
 static struct sb_bitmap* sb_bitmap_font() {
 	const char* font_file_path = "C:/Windows/Fonts/cour.ttf";
@@ -74,11 +74,7 @@ static struct sb_bitmap* sb_bitmap_font() {
 	ascent *= scale;
 	struct sb_bitmap* bitmap = make_empty_bitmap(BITMAP_WIDTH, BITMAP_HEIGHT, 1);
 
-	const char* baked_string = "stb_truetype demo";
-	char* ptr = baked_string;
-
-	while (*ptr) {
-		char c = *ptr;
+	for (char c = '!'; c <= '~'; ++c) {
 		int x1, y1, x2, y2;
 		stbtt_GetCodepointBitmapBox(&font, c, scale, scale, &x1, &y1, &x2, &y2);
 
@@ -91,15 +87,40 @@ static struct sb_bitmap* sb_bitmap_font() {
 		int ax;
 		stbtt_GetCodepointHMetrics(&font, c, &ax, NULL);
 		x += ax * scale;
-
-		ptr++;
-
 		/* advance kerning n-1 times */
-		if (*ptr) {
-			int kern = stbtt_GetCodepointKernAdvance(&font, c, *ptr);
+		char next = c + 1;
+		if (next < '~') {
+			int kern = stbtt_GetCodepointKernAdvance(&font, c, next);
 			x += kern * scale;
 		}
 	}
+
+	//const char* baked_string = "stb_truetype demo";
+	//char* ptr = baked_string;
+
+	//while (*ptr) {
+	//	char c = *ptr;
+	//	int x1, y1, x2, y2;
+	//	stbtt_GetCodepointBitmapBox(&font, c, scale, scale, &x1, &y1, &x2, &y2);
+
+	//	float y = ascent + y1;
+
+	//	int byte_offset = x + y * BITMAP_WIDTH;
+
+	//	stbtt_MakeCodepointBitmap(&font, (uint8_t*)bitmap->data + byte_offset, x2 - x1, y2 - y1, BITMAP_WIDTH, scale, scale, c);
+
+	//	int ax;
+	//	stbtt_GetCodepointHMetrics(&font, c, &ax, NULL);
+	//	x += ax * scale;
+
+	//	ptr++;
+
+	//	/* advance kerning n-1 times */
+	//	if (*ptr) {
+	//		int kern = stbtt_GetCodepointKernAdvance(&font, c, *ptr);
+	//		x += kern * scale;
+	//	}
+	//}
 	return bitmap;
 }
 
