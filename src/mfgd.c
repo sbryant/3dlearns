@@ -142,7 +142,7 @@ int main(int argc, char** argv) {
 	renderInfo.width = (unsigned int)info.w;
 	renderInfo.height = (unsigned int)info.h;
 
-	printf("w %d, h %d\n", info.w, info.h);
+	fprintf(stderr, "w %d, h %d\n", info.w, info.h);
 
 	/* Setup OpenGL 3.2 Context For OS X */
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
 
 	GLenum err = glGetError();
 	if (err != 0) {
-		printf("GLError: %d\n", err);
+		fprintf(stderr, "GLError: %d\n", err);
 	}
 
 	/* Use GLEW to setup gl Functions */
@@ -188,7 +188,7 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 
-	printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+	fprintf(stderr, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 	err = glGetError();
 	err = err == GL_INVALID_ENUM ? 0 : err;
 	if (err != 0) {
@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
 	const GLubyte* version = glGetString(GL_VERSION);
 	const GLubyte* glsl_ver = glGetString(GL_SHADING_LANGUAGE_VERSION);
 
-	printf("%s : %s (%s)\n >> GLSL: %s\n",
+	fprintf(stderr, "%s : %s (%s)\n >> GLSL: %s\n",
 		vendor,
 		renderer,
 		version,
