@@ -149,6 +149,10 @@ void my_draw() {
 
 	shader_use(&render_group.shaderInfo);
 	glBindVertexArray(render_group.vao);
+
+	int location = glGetUniformLocation(render_group.shaderInfo.program, "projection");
+	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)render_group.projection);
+
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -228,6 +232,13 @@ int main(int argc, char** argv) {
 		glsl_ver);
 
 	shader_compile(&render_group.shaderInfo, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
+
+	mat4x4_identity(&render_group.projection);
+
+	float aspect = (float)info.w / (float)info.h;
+
+	/* normal ortho projection from -1,1 is TL and 1.0,-1.0 is BR */
+	mat4x4_ortho(&render_group.projection, -aspect, aspect, -1.0f, 1.0f, 1.0f, -1.0f);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
