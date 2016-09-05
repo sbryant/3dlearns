@@ -70,7 +70,7 @@ static struct sb_bitmap* sb_bitmap_font() {
 	int ascent, descent, line_gap, x = 0;
 	stbtt_GetFontVMetrics(&font, &ascent, &descent, &line_gap);
 
-	float scale = stbtt_ScaleForPixelHeight(&font, 60);
+	float scale = stbtt_ScaleForPixelHeight(&font, 64);
 	ascent *= scale;
 	struct sb_bitmap* bitmap = make_empty_bitmap(BITMAP_WIDTH, BITMAP_HEIGHT, 1);
 
@@ -229,6 +229,9 @@ int main(int argc, char** argv) {
 
 	shader_compile(&render_group.shaderInfo, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
 	glGenVertexArrays(1, &render_group.vao);
 	glBindVertexArray(render_group.vao);
 	int tex; glGenTextures(1, &tex);
@@ -237,12 +240,13 @@ int main(int argc, char** argv) {
 	struct sb_bitmap* font = sb_bitmap_font();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, font->width, font->height, 0, GL_RED, GL_UNSIGNED_BYTE, font->data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
+	glGenerateMipmap(GL_TEXTURE_2D);
 
 	int vbo; glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
