@@ -446,7 +446,8 @@ int main(int argc, char** argv) {
 	sb_bitmap_free(font);
 
 	glDeleteBuffers(1, &render_group.vbo);
-	glDeleteBuffers(1, &render_group.vao);
+	glDeleteBuffers(1, &debug_render_group.vbo);
+	glDeleteBuffers(1, &debug_render_group.texture);
 	glDeleteVertexArrays(1, &render_group.vao);
 	shader_cleanup(&render_group.shader_info);
 
