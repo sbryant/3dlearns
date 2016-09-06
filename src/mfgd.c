@@ -109,7 +109,7 @@ static struct sb_debug_cycle_counter sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUN
 #define sb_debug_cycle_end_timed_block(ID) sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUNTER__##ID].cycle_count += __rdtsc() - __start_cycle_count__##ID; sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUNTER__##ID].hit_count++;
 #define sb_debug_cycle_end_counted(ID, count) sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUNTER__##ID].cycle_count += __rdtsc() - __start_cycle_count__##ID; sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUNTER__##ID].hit_count += count;
 
-static void sb_debug_cycle_counters_display(void) {
+static void sb_debug_handle_cycle_counters(void) {
 	fprintf(stderr, "DEBUG CYCLE COUNTERS:\n");
 	for (int i = 0; i < (sizeof(sb_debug_cycle_counters) / sizeof(sb_debug_cycle_counters[0])); ++i) {
 		struct sb_debug_cycle_counter* counter = &sb_debug_cycle_counters[i];
@@ -425,7 +425,7 @@ int main(int argc, char** argv) {
 		glDrawArrays(GL_TRIANGLES, 0, 6 * strlen(test_string));
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		sb_debug_cycle_counters_display();
+		sb_debug_handle_cycle_counters();
 
 		SDL_GL_SwapWindow(screen);
 	}
