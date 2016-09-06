@@ -347,11 +347,6 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	mat4x4 transform;  mat4x4_identity(&transform);
-
-	/* translate quads by half of font scale + 3 to be off the edge of the screen */
-	mat4x4_translate(transform, 0.0f, 64.0f + 3, 0.0f);
-
 	glGenBuffers(1, &debug_render_group.vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, debug_render_group.vbo);
 	glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
@@ -415,11 +410,28 @@ int main(int argc, char** argv) {
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
+		/* this projection is orthographic with left-top 0,0, right-bttom width, height coordinates */
 		int location = glGetUniformLocation(debug_render_group.shader_info.program, "projection");
 		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)debug_render_group.projection);
 
-		/* this transform is the left-top 0,0, right-bttom width, height orthgraphic projection */
+	
+		mat4x4 transform;  mat4x4_identity(&transform);
+
+		/* translate quads by half of font scale + 3 to account for font scale */
+		mat4x4_translate(transform, 0.0f, 64.0f, 0.0f);
 		location = glGetUniformLocation(debug_render_group.shader_info.program, "model");
+		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)transform);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6 * strlen(test_string));
+		
+		mat4x4_identity(&transform);
+		mat4x4_translate(transform, 0.0f, (64.0 * 2) + 5, 0.0f);
+		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)transform);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6 * strlen(test_string));
+
+		mat4x4_identity(&transform);
+		mat4x4_translate(transform, 0.0f, (64.0 * 3) + 10, 0.0f);
 		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)transform);
 
 		glDrawArrays(GL_TRIANGLES, 0, 6 * strlen(test_string));
