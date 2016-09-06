@@ -66,8 +66,6 @@ static struct sb_bitmap* sb_bitmap_font(width, height) {
 	const char* font_file_path = "C:/Windows/Fonts/cour.ttf";
 	struct sb_debug_file_read_result* font_file = debug_read_entire_file(font_file_path);
 	struct sb_bitmap* bitmap = make_empty_bitmap(width, height, 1);
-
-	stbtt_fontinfo font;
 	uint8_t* data = (uint8_t*)(font_file->data);
 
 	/* gets all characters from ! - ~ (includes a-Z 0-9) */
