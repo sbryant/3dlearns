@@ -23,4 +23,4 @@ library from Sean Barrett to render a bitmap font and textured quad
 - [debug](https://github.com/sbryant/3dlearns/tree/debug) - buidling on the 
 [stb_truetype](https://github.com/sbryant/3dlearns/tree/stb_truetype) branch for
 rendering text with true type fonts to bake a bitmap and render characters to quads
-as lines of text out to the screen. :warning:WIP:warning
+as lines of text out to the screen. :warning:**WIP**:warning:
