@@ -58,8 +58,9 @@ struct sb_bitmap* make_empty_bitmap(int width, int height, int zero) {
 }
 
 static stbtt_bakedchar cdata[128];
-#define BITMAP_WIDTH 2048
-#define BITMAP_HEIGHT 2048
+
+#define BITMAP_WIDTH 1024
+#define BITMAP_HEIGHT 1024
 
 static struct sb_bitmap* sb_bitmap_font(width, height) {
 	const char* font_file_path = "C:/Windows/Fonts/cour.ttf";
@@ -70,7 +71,7 @@ static struct sb_bitmap* sb_bitmap_font(width, height) {
 	uint8_t* data = (uint8_t*)(font_file->data);
 
 	/* gets all characters from ! - ~ (includes a-Z 0-9) */
-	stbtt_BakeFontBitmap(data, 0, 256.0, bitmap->data, bitmap->width, bitmap->height, '!', ('~' - '!')+1, &cdata[0]);
+	stbtt_BakeFontBitmap(data, 0, 128.0, bitmap->data, bitmap->width, bitmap->height, ' ', ('~' - ' ')+1, &cdata[0]);
 
 	return bitmap;
 }
@@ -126,6 +127,7 @@ static void sb_debug_cycle_counters_display(void) {
 }
 
 static struct sb_render_group render_group = { 0 };
+static struct sb_render_group debug_render_group = { 0 };
 
 void update(float dt) {
 }
@@ -135,10 +137,19 @@ void my_draw() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	shader_use(&render_group.shader_info);
-	glBindVertexArray(render_group.vao);
+	glBindBuffer(GL_ARRAY_BUFFER, render_group.vbo);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	
 
 	int location = glGetUniformLocation(render_group.shader_info.program, "projection");
 	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)render_group.projection);
+
+	location = glGetUniformLocation(render_group.shader_info.program, "model");
+	mat4x4 ident;  mat4x4_identity(&ident);
+	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)ident);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
@@ -219,6 +230,7 @@ int main(int argc, char** argv) {
 		glsl_ver);
 
 	shader_compile(&render_group.shader_info, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
+	debug_render_group.shader_info.program = render_group.shader_info.program;
 
 	mat4x4_identity(&render_group.projection);
 
@@ -226,28 +238,39 @@ int main(int argc, char** argv) {
 
 	/* normal ortho projection from -1,1 is TL and 1.0,-1.0 is BR */
 	mat4x4_ortho(&render_group.projection, -aspect, aspect, -1.0f, 1.0f, 1.0f, -1.0f);
+	mat4x4_ortho(&debug_render_group.projection, 0, info.w, info.h, 0.0, 1.0, -1.0);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 	glGenVertexArrays(1, &render_group.vao);
 	glBindVertexArray(render_group.vao);
-	int tex; glGenTextures(1, &tex);
+
+	int pos_attr = glGetAttribLocation(render_group.shader_info.program, "in_position");
+	int uv_attr = glGetAttribLocation(render_group.shader_info.program, "in_tex");
+
+	glGenTextures(1, &render_group.texture);
+
 
 	/* generate bitmap font texture */
-	struct sb_bitmap* font = sb_bitmap_font(2048, 2048);
+	struct sb_bitmap* font = sb_bitmap_font(BITMAP_WIDTH, BITMAP_HEIGHT);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex);
+	glBindTexture(GL_TEXTURE_2D, render_group.texture);
 
+	/* default assumes 4byte alignment */
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, font->width, font->height, 0, GL_RED, GL_UNSIGNED_BYTE, font->data);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
-	int vbo; glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glGenBuffers(1, &render_group.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, render_group.vbo);
+	glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+	glEnableVertexAttribArray(pos_attr);
+
+	glVertexAttribPointer(uv_attr, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(uv_attr);
 
 	const float vertices[] =
 	{
@@ -261,14 +284,87 @@ int main(int argc, char** argv) {
 	};
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	int pos_attr = glGetAttribLocation(render_group.shader_info.program, "in_position");
-	int uv_attr = glGetAttribLocation(render_group.shader_info.program, "in_tex");
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	const char* test_string = "DEBUG TEST STRING";
+
+	/* 3 verts and two tex coords per tri and 2 tris per quad = (x, y, z, s, t) * 3 * 2 */
+	const int string_verts_count = 30 * strlen(test_string);
+	float *verts = calloc(1, string_verts_count * sizeof(float));
+
+	/*
+	vert format is x, y, z, s, t - starting at top left and renders clockwise
+	*/
+
+	int x, y, i; x = y = i = 0;
+	for (char* c = test_string; *c; ++c) {
+		/* only supports the ASCII printable character code points */
+		if (*c >= 32 && *c < 128) {
+			stbtt_aligned_quad quad;
+			stbtt_GetBakedQuad(cdata, font->width, font->height, *c - 32, &x, &y, &quad, 1);
+
+			/* top left */
+			verts[i + 0] = quad.x0;
+			verts[i + 1] = quad.y0;
+			verts[i + 2] = 0.0f;
+			verts[i + 3] = quad.s0;
+			verts[i + 4] = quad.t0;
+
+			/* top right */
+			verts[i + 5] = quad.x1;
+			verts[i + 6] = quad.y0;
+			verts[i + 7] = 0.0f;
+			verts[i + 8] = quad.s1;
+			verts[i + 9] = quad.t0;
+
+			/* bottom right */
+			verts[i + 10] = quad.x1;
+			verts[i + 11] = quad.y1;
+			verts[i + 12] = 0.0f;
+			verts[i + 13] = quad.s1;
+			verts[i + 14] = quad.t1;
+
+			/* bottom right */
+			verts[i + 15] = quad.x1;
+			verts[i + 16] = quad.y1;
+			verts[i + 17] = 0.0f;
+			verts[i + 18] = quad.s1;
+			verts[i + 19] = quad.t1;
+
+			/* bottom left */
+			verts[i + 20] = quad.x0;
+			verts[i + 21] = quad.y1;
+			verts[i + 22] = 0.0f;
+			verts[i + 23] = quad.s0;
+			verts[i + 24] = quad.t1;
+
+			/* top left */
+			verts[i + 25] = quad.x0;
+			verts[i + 26] = quad.y0;
+			verts[i + 27] = 0.0f;
+			verts[i + 28] = quad.s0;
+			verts[i + 29] = quad.t0;
+
+			i += 30;
+		}
+	}
+
+	mat4x4 transform;  mat4x4_identity(&transform);
+
+	/* translate quads by half of font scale + 3 to be off the edge of the screen */
+	mat4x4_translate(transform, 0.0f, 64.0f + 3, 0.0f);
+
+	glGenBuffers(1, &debug_render_group.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, debug_render_group.vbo);
 	glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
 	glEnableVertexAttribArray(pos_attr);
 
 	glVertexAttribPointer(uv_attr, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(uv_attr);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * string_verts_count, verts, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	free(verts);
 
 	uint32_t old = SDL_GetTicks();
 	uint32_t now = SDL_GetTicks();
@@ -314,6 +410,23 @@ int main(int argc, char** argv) {
 		sb_debug_cycle_end_timed_block(UPDATE_AND_RENDER);
 		my_draw();
 
+		/* render debug text */
+		glBindBuffer(GL_ARRAY_BUFFER, debug_render_group.vbo);
+		glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+		int location = glGetUniformLocation(debug_render_group.shader_info.program, "projection");
+		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)debug_render_group.projection);
+
+		/* this transform is the left-top 0,0, right-bttom width, height orthgraphic projection */
+		location = glGetUniformLocation(debug_render_group.shader_info.program, "model");
+		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)transform);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6 * strlen(test_string));
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 		sb_debug_cycle_counters_display();
 
 		SDL_GL_SwapWindow(screen);
@@ -321,7 +434,7 @@ int main(int argc, char** argv) {
 
 	sb_bitmap_free(font);
 
-	glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &render_group.vbo);
 	glDeleteBuffers(1, &render_group.vao);
 	glDeleteVertexArrays(1, &render_group.vao);
 	shader_cleanup(&render_group.shader_info);
