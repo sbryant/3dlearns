@@ -405,8 +405,8 @@ int main(int argc, char** argv) {
 		}
 
 		update(dt);
-		sb_debug_cycle_end_timed_block(UPDATE_AND_RENDER);
 		my_draw();
+		sb_debug_cycle_end_timed_block(UPDATE_AND_RENDER);
 
 		/* render debug text */
 		glBindBuffer(GL_ARRAY_BUFFER, debug_render_group.vbo);
