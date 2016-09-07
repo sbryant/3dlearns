@@ -113,8 +113,8 @@ static struct sb_debug_cycle_counter sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUN
 /* potentially 1k characters */
 static float debug_text_vert_buffer[1024 * 30];
 
-static float atY = FONT_SCALE;
-static float atX = 0.0f;
+static float atY = FONT_SCALE + 2;
+static float atX = 2;
 static int num_text_lines = 0;
 static int num_of_chars = 0;
 
@@ -184,8 +184,8 @@ static void sb_debug_render_text(const char* string, struct sb_bitmap* font) {
 	}
 
 	/* move down a single line of text + 5 pixels */
-	atY += (num_text_lines + 5 + FONT_SCALE);
-	atX = 0.0;
+	atY += (num_text_lines + 10 + FONT_SCALE);
+	atX = 2;
 	++num_text_lines;
 }
 
@@ -196,7 +196,7 @@ static void sb_debug_overlay_cycle_counters(struct sb_bitmap* font) {
 		"Rendergroup Render"
 	};
 
-	sb_debug_render_text("DEBUG CYCLE _COUNTERS", font);
+	sb_debug_render_text("DEBUG CYCLE COUNTERS", font);
 	//fprintf(stderr, "DEBUG CYCLE COUNTERS:\n");
 	char string_buff[1024];
 	for (int i = 0; i < (sizeof(sb_debug_cycle_counters) / sizeof(sb_debug_cycle_counters[0])); ++i) {
@@ -204,7 +204,7 @@ static void sb_debug_overlay_cycle_counters(struct sb_bitmap* font) {
 		if (counter->hit_count) {
 
 			snprintf(string_buff, sizeof(string_buff), 
-				"%s: %I64dcy %uh %I64dcy / h", 
+				"%s: %I64dcy %uh %I64dcy/h", 
 				counter_labels[i],
 				counter->cycle_count, 
 				counter->hit_count, 
@@ -464,14 +464,13 @@ int main(int argc, char** argv) {
 		int location = glGetUniformLocation(debug_render_group.shader_info.program, "projection");
 		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)debug_render_group.projection);
 
-
 		location = glGetUniformLocation(debug_render_group.shader_info.program, "model");
 		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)ident);
 		glDrawArrays(GL_TRIANGLES, 0, 6 * num_of_chars);
 		
 		num_text_lines = 0;
 		num_of_chars = 0;
-		atX = 0;
+		atX = 2;
 		atY = FONT_SCALE + 2;
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
