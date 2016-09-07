@@ -61,6 +61,7 @@ static stbtt_bakedchar cdata[128];
 
 #define BITMAP_WIDTH 1024
 #define BITMAP_HEIGHT 1024
+#define FONT_SCALE 24.0
 
 static struct sb_bitmap* sb_bitmap_font(width, height) {
 	const char* font_file_path = "C:/Windows/Fonts/cour.ttf";
@@ -68,8 +69,8 @@ static struct sb_bitmap* sb_bitmap_font(width, height) {
 	struct sb_bitmap* bitmap = make_empty_bitmap(width, height, 1);
 	uint8_t* data = (uint8_t*)(font_file->data);
 
-	/* gets all characters from ! - ~ (includes a-Z 0-9) */
-	stbtt_BakeFontBitmap(data, 0, 128.0, bitmap->data, bitmap->width, bitmap->height, ' ', ('~' - ' ')+1, &cdata[0]);
+	/* gets all characters from SPC - ~ (includes a-Z 0-9) */
+	stbtt_BakeFontBitmap(data, 0, FONT_SCALE * 2.0f, bitmap->data, bitmap->width, bitmap->height, ' ', ('~' - ' ')+1, &cdata[0]);
 
 	return bitmap;
 }
@@ -109,12 +110,120 @@ static struct sb_debug_cycle_counter sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUN
 #define sb_debug_cycle_end_timed_block(ID) sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUNTER__##ID].cycle_count += __rdtsc() - __start_cycle_count__##ID; sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUNTER__##ID].hit_count++;
 #define sb_debug_cycle_end_counted(ID, count) sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUNTER__##ID].cycle_count += __rdtsc() - __start_cycle_count__##ID; sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUNTER__##ID].hit_count += count;
 
+/* potentially 1k characters */
+static float debug_text_vert_buffer[1024 * 30];
+
+static float atY = FONT_SCALE;
+static float atX = 0.0f;
+static int num_text_lines = 0;
+static int num_of_chars = 0;
+
+static void sb_debug_render_text(const char* string, struct sb_bitmap* font) {
+	/* 3 verts and two tex coords per tri and 2 tris per quad = (x, y, z, s, t) * 3 * 2 */
+	int string_verts_count = 30 * strlen(string);
+
+	if (string_verts_count > (sizeof(debug_text_vert_buffer) / sizeof(debug_text_vert_buffer[0]))) {
+		string_verts_count = (sizeof(debug_text_vert_buffer) / sizeof(debug_text_vert_buffer[0]));
+	}
+
+	/*
+	vert format is x, y, z, s, t - starting at top left and renders clockwise
+	*/
+	int i = num_of_chars * 30; // there are 30 floats per quad
+	for (char* c = string; *c; ++c) {
+		/* only supports the ASCII printable character code points */
+		if (*c >= 32 && *c < 128) {
+			stbtt_aligned_quad quad;
+			stbtt_GetBakedQuad(cdata, font->width, font->height, *c - 32, &atX, &atY, &quad, 1);
+
+			/* top left */
+			debug_text_vert_buffer[i + 0] = quad.x0;
+			debug_text_vert_buffer[i + 1] = quad.y0;
+			debug_text_vert_buffer[i + 2] = 0.0f;
+			debug_text_vert_buffer[i + 3] = quad.s0;
+			debug_text_vert_buffer[i + 4] = quad.t0;
+
+			/* top right */
+			debug_text_vert_buffer[i + 5] = quad.x1;
+			debug_text_vert_buffer[i + 6] = quad.y0;
+			debug_text_vert_buffer[i + 7] = 0.0f;
+			debug_text_vert_buffer[i + 8] = quad.s1;
+			debug_text_vert_buffer[i + 9] = quad.t0;
+
+			/* bottom right */
+			debug_text_vert_buffer[i + 10] = quad.x1;
+			debug_text_vert_buffer[i + 11] = quad.y1;
+			debug_text_vert_buffer[i + 12] = 0.0f;
+			debug_text_vert_buffer[i + 13] = quad.s1;
+			debug_text_vert_buffer[i + 14] = quad.t1;
+
+			/* bottom right */
+			debug_text_vert_buffer[i + 15] = quad.x1;
+			debug_text_vert_buffer[i + 16] = quad.y1;
+			debug_text_vert_buffer[i + 17] = 0.0f;
+			debug_text_vert_buffer[i + 18] = quad.s1;
+			debug_text_vert_buffer[i + 19] = quad.t1;
+
+			/* bottom left */
+			debug_text_vert_buffer[i + 20] = quad.x0;
+			debug_text_vert_buffer[i + 21] = quad.y1;
+			debug_text_vert_buffer[i + 22] = 0.0f;
+			debug_text_vert_buffer[i + 23] = quad.s0;
+			debug_text_vert_buffer[i + 24] = quad.t1;
+
+			/* top left */
+			debug_text_vert_buffer[i + 25] = quad.x0;
+			debug_text_vert_buffer[i + 26] = quad.y0;
+			debug_text_vert_buffer[i + 27] = 0.0f;
+			debug_text_vert_buffer[i + 28] = quad.s0;
+			debug_text_vert_buffer[i + 29] = quad.t0;
+
+			i += 30;
+			++num_of_chars;
+		}
+	}
+
+	/* move down a single line of text + 5 pixels */
+	atY += (num_text_lines + 5 + FONT_SCALE);
+	atX = 0.0;
+	++num_text_lines;
+}
+
+static void sb_debug_overlay_cycle_counters(struct sb_bitmap* font) {
+	const char* counter_labels[SB_DEBUG_CYCLE_COUNTER_COUNT] = {
+		"Update and Render",
+		"Program Start",
+		"Rendergroup Render"
+	};
+
+	sb_debug_render_text("DEBUG CYCLE _COUNTERS", font);
+	//fprintf(stderr, "DEBUG CYCLE COUNTERS:\n");
+	char string_buff[1024];
+	for (int i = 0; i < (sizeof(sb_debug_cycle_counters) / sizeof(sb_debug_cycle_counters[0])); ++i) {
+		struct sb_debug_cycle_counter* counter = sb_debug_cycle_counters + i;
+		if (counter->hit_count) {
+
+			snprintf(string_buff, sizeof(string_buff), 
+				"%s: %I64dcy %uh %I64dcy / h", 
+				counter_labels[i],
+				counter->cycle_count, 
+				counter->hit_count, 
+				counter->cycle_count / counter->hit_count);
+
+			sb_debug_render_text(string_buff, font);
+
+			counter->cycle_count = 0;
+			counter->hit_count = 0;
+		}
+	}
+}
+
 static void sb_debug_handle_cycle_counters(void) {
 	fprintf(stderr, "DEBUG CYCLE COUNTERS:\n");
 	for (int i = 0; i < (sizeof(sb_debug_cycle_counters) / sizeof(sb_debug_cycle_counters[0])); ++i) {
 		struct sb_debug_cycle_counter* counter = &sb_debug_cycle_counters[i];
 		if (counter->hit_count) {
-			fprintf(stderr, "%d: %I64ducy %uh %I64ucy/h\n", i, counter->cycle_count,
+			fprintf(stderr, "%d: %I64dcy %uh %I64dcy/h\n", i, counter->cycle_count,
 				counter->hit_count,
 				counter->cycle_count / counter->hit_count);
 
@@ -249,7 +358,6 @@ int main(int argc, char** argv) {
 
 	glGenTextures(1, &render_group.texture);
 
-
 	/* generate bitmap font texture */
 	struct sb_bitmap* font = sb_bitmap_font(BITMAP_WIDTH, BITMAP_HEIGHT);
 	glActiveTexture(GL_TEXTURE0);
@@ -284,69 +392,6 @@ int main(int argc, char** argv) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	const char* test_string = "DEBUG TEST STRING";
-
-	/* 3 verts and two tex coords per tri and 2 tris per quad = (x, y, z, s, t) * 3 * 2 */
-	const int string_verts_count = 30 * strlen(test_string);
-	float *verts = calloc(1, string_verts_count * sizeof(float));
-
-	/*
-	vert format is x, y, z, s, t - starting at top left and renders clockwise
-	*/
-
-	int x, y, i; x = y = i = 0;
-	for (char* c = test_string; *c; ++c) {
-		/* only supports the ASCII printable character code points */
-		if (*c >= 32 && *c < 128) {
-			stbtt_aligned_quad quad;
-			stbtt_GetBakedQuad(cdata, font->width, font->height, *c - 32, &x, &y, &quad, 1);
-
-			/* top left */
-			verts[i + 0] = quad.x0;
-			verts[i + 1] = quad.y0;
-			verts[i + 2] = 0.0f;
-			verts[i + 3] = quad.s0;
-			verts[i + 4] = quad.t0;
-
-			/* top right */
-			verts[i + 5] = quad.x1;
-			verts[i + 6] = quad.y0;
-			verts[i + 7] = 0.0f;
-			verts[i + 8] = quad.s1;
-			verts[i + 9] = quad.t0;
-
-			/* bottom right */
-			verts[i + 10] = quad.x1;
-			verts[i + 11] = quad.y1;
-			verts[i + 12] = 0.0f;
-			verts[i + 13] = quad.s1;
-			verts[i + 14] = quad.t1;
-
-			/* bottom right */
-			verts[i + 15] = quad.x1;
-			verts[i + 16] = quad.y1;
-			verts[i + 17] = 0.0f;
-			verts[i + 18] = quad.s1;
-			verts[i + 19] = quad.t1;
-
-			/* bottom left */
-			verts[i + 20] = quad.x0;
-			verts[i + 21] = quad.y1;
-			verts[i + 22] = 0.0f;
-			verts[i + 23] = quad.s0;
-			verts[i + 24] = quad.t1;
-
-			/* top left */
-			verts[i + 25] = quad.x0;
-			verts[i + 26] = quad.y0;
-			verts[i + 27] = 0.0f;
-			verts[i + 28] = quad.s0;
-			verts[i + 29] = quad.t0;
-
-			i += 30;
-		}
-	}
-
 	glGenBuffers(1, &debug_render_group.vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, debug_render_group.vbo);
 	glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
@@ -354,14 +399,16 @@ int main(int argc, char** argv) {
 
 	glVertexAttribPointer(uv_attr, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(uv_attr);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * string_verts_count, verts, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(debug_text_vert_buffer), NULL, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	free(verts);
 
 	uint32_t old = SDL_GetTicks();
 	uint32_t now = SDL_GetTicks();
 	int pause = 0;
+
+	mat4x4 ident;
+	/* translate quads by half of font scale to account for font scale */
+	mat4x4_identity(ident);
 
 	while (1) {
 		sb_debug_cycle_begin_timed_block(UPDATE_AND_RENDER);
@@ -402,6 +449,7 @@ int main(int argc, char** argv) {
 		update(dt);
 		my_draw();
 		sb_debug_cycle_end_timed_block(UPDATE_AND_RENDER);
+		sb_debug_overlay_cycle_counters(font);
 
 		/* render debug text */
 		glBindBuffer(GL_ARRAY_BUFFER, debug_render_group.vbo);
@@ -410,35 +458,22 @@ int main(int argc, char** argv) {
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
+		glBufferSubData(GL_ARRAY_BUFFER, 0, 30 * num_of_chars * sizeof(float), debug_text_vert_buffer);
+
 		/* this projection is orthographic with left-top 0,0, right-bttom width, height coordinates */
 		int location = glGetUniformLocation(debug_render_group.shader_info.program, "projection");
 		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)debug_render_group.projection);
 
-		mat4x4 transform;  mat4x4_identity(&transform);
 
-		/* translate quads by half of font scale to account for font scale */
-		mat4x4_translate(transform, 0.0f, 64.0f, 0.0f);
 		location = glGetUniformLocation(debug_render_group.shader_info.program, "model");
-		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)transform);
-
-		glDrawArrays(GL_TRIANGLES, 0, 6 * strlen(test_string));
+		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)ident);
+		glDrawArrays(GL_TRIANGLES, 0, 6 * num_of_chars);
 		
-		/* render another line */
-		mat4x4_identity(&transform);
-		mat4x4_translate(transform, 0.0f, (64.0 * 2) + 5, 0.0f);
-		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)transform);
-
-		glDrawArrays(GL_TRIANGLES, 0, 6 * strlen(test_string));
-
-		/* and render a third line */
-		mat4x4_identity(&transform);
-		mat4x4_translate(transform, 0.0f, (64.0 * 3) + 10, 0.0f);
-		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)transform);
-
-		glDrawArrays(GL_TRIANGLES, 0, 6 * strlen(test_string));
+		num_text_lines = 0;
+		num_of_chars = 0;
+		atX = 0;
+		atY = FONT_SCALE + 2;
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-		sb_debug_handle_cycle_counters();
 
 		SDL_GL_SwapWindow(screen);
 	}
