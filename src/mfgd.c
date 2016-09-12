@@ -448,7 +448,18 @@ int main(int argc, char** argv) {
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
-		glBufferSubData(GL_ARRAY_BUFFER, 0, 30 * num_of_chars * sizeof(float), debug_text_vert_buffer);
+		int text_quad_buff_size = 30 * num_of_chars * sizeof(float);
+
+		void* old_data = glMapBufferRange(GL_ARRAY_BUFFER, 0, text_quad_buff_size, GL_MAP_WRITE_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+
+		/* force the data to be available */
+		glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
+
+		/* update verts and tex coords */
+		memcpy(old_data, debug_text_vert_buffer, text_quad_buff_size);
+		
+		glFlushMappedBufferRange(GL_ARRAY_BUFFER, 0, text_quad_buff_size);
+		glUnmapBuffer(GL_ARRAY_BUFFER);
 
 		/* this projection is orthographic with left-top 0,0, right-bttom width, height coordinates */
 		int location = glGetUniformLocation(debug_render_group.shader_info.program, "projection");
@@ -456,7 +467,14 @@ int main(int argc, char** argv) {
 
 		location = glGetUniformLocation(debug_render_group.shader_info.program, "model");
 		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)ident);
+
+		location = glGetUniformLocation(debug_render_group.shader_info.program, "view");
+		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)ident);
+		
+		/* draw all text */
 		glDrawArrays(GL_TRIANGLES, 0, 6 * num_of_chars);
+
+		fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 		
 		num_text_lines = 0;
 		num_of_chars = 0;
