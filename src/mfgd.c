@@ -59,9 +59,9 @@ struct sb_bitmap* make_empty_bitmap(int width, int height, int zero) {
 
 static stbtt_bakedchar cdata[128];
 
-#define BITMAP_WIDTH 1024
-#define BITMAP_HEIGHT 1024
-#define FONT_SCALE 24.0
+#define BITMAP_WIDTH 512
+#define BITMAP_HEIGHT 512
+#define FONT_SCALE 16
 
 static struct sb_bitmap* sb_bitmap_font(width, height) {
 	const char* font_file_path = "C:/Windows/Fonts/cour.ttf";
@@ -206,7 +206,7 @@ static void sb_debug_overlay_cycle_counters(struct sb_bitmap* font) {
 			snprintf(string_buff, sizeof(string_buff), 
 				"%s: %I64dcy %uh %I64dcy/h", 
 				counter_labels[i],
-				counter->cycle_count, 
+				counter->cycle_count,	
 				counter->hit_count, 
 				counter->cycle_count / counter->hit_count);
 
@@ -217,22 +217,6 @@ static void sb_debug_overlay_cycle_counters(struct sb_bitmap* font) {
 		}
 	}
 }
-
-static void sb_debug_handle_cycle_counters(void) {
-	fprintf(stderr, "DEBUG CYCLE COUNTERS:\n");
-	for (int i = 0; i < (sizeof(sb_debug_cycle_counters) / sizeof(sb_debug_cycle_counters[0])); ++i) {
-		struct sb_debug_cycle_counter* counter = &sb_debug_cycle_counters[i];
-		if (counter->hit_count) {
-			fprintf(stderr, "%d: %I64dcy %uh %I64dcy/h\n", i, counter->cycle_count,
-				counter->hit_count,
-				counter->cycle_count / counter->hit_count);
-
-			counter->cycle_count = 0;
-			counter->hit_count = 0;
-		}
-	}
-}
-
 static struct sb_render_group render_group = { 0 };
 static struct sb_render_group debug_render_group = { 0 };
 
@@ -250,7 +234,6 @@ void my_draw() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	
-
 	int location = glGetUniformLocation(render_group.shader_info.program, "projection");
 	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)render_group.projection);
 
@@ -288,11 +271,15 @@ int main(int argc, char** argv) {
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
+
+	int window_height = 720;
+	int window_width = 1280;
+
 	/* Create a fullscreen window */
 	SDL_Window *screen = SDL_CreateWindow("OpenGL",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
-		1280, 720,
+		window_width, window_height,
 		SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_OPENGL);
 
 	SDL_SetRelativeMouseMode(1);
@@ -320,7 +307,9 @@ int main(int argc, char** argv) {
 
 	fprintf(stderr, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 	err = glGetError();
+#if defined(__APPLE_CC__)
 	err = err == GL_INVALID_ENUM ? 0 : err;
+#endif
 	if (err != 0) {
 		printf("GLError: %d\n", err);
 	}
@@ -341,7 +330,7 @@ int main(int argc, char** argv) {
 
 	mat4x4_identity(&render_group.projection);
 
-	float aspect = (float)info.w / (float)info.h;
+	float aspect = (float)window_width / (float)window_height;
 
 	/* normal ortho projection from -1,1 is TL and 1.0,-1.0 is BR */
 	mat4x4_ortho(&render_group.projection, -aspect, aspect, -1.0f, 1.0f, 1.0f, -1.0f);
@@ -368,6 +357,7 @@ int main(int argc, char** argv) {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, font->width, font->height, 0, GL_RED, GL_UNSIGNED_BYTE, font->data);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glGenBuffers(1, &render_group.vbo);
