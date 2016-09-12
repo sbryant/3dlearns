@@ -248,6 +248,7 @@ void my_draw() {
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR     lpCmdLine,
 	int       nCmdShow) {
 #else
+GLsync fence = 0;
 int main(int argc, char** argv) {
 #endif
 
