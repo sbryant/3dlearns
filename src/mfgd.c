@@ -1,3 +1,13 @@
+/*  
+ *	TODO:
+ *	- Draw colored (vertex) quads tiled across the screen
+ *	- include some spacing between tiles
+ *	
+ *	VISITED (not sure if done):
+ *	- Bitmap based font rendering
+ *	- easy way to accumulate text that's spit out at the end of a frame 
+ */
+
 #if defined(_WIN32) 
 #include <Windows.h>
 #include <intrin.h>
