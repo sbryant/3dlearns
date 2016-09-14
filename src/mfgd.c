@@ -24,7 +24,12 @@
 #include "shader.h"
 #include "sb_debug.h"
 
+
+#define BITMAP_WIDTH 512
+#define BITMAP_HEIGHT 512
 #define BITMAP_BYTES_PER_PIXEL 1
+#define FONT_SCALE 16
+#define HALF_FONT_SCALE (FONT_SCALE / 2.0)
 
 struct sb_bitmap {
 	void* data;
@@ -59,10 +64,6 @@ struct sb_bitmap* make_empty_bitmap(int width, int height, int zero) {
 
 static stbtt_bakedchar cdata[128];
 
-#define BITMAP_WIDTH 512
-#define BITMAP_HEIGHT 512
-#define FONT_SCALE 16
-
 static struct sb_bitmap* sb_bitmap_font(width, height) {
 	const char* font_file_path = "C:/Windows/Fonts/cour.ttf";
 	struct sb_debug_file_read_result* font_file = debug_read_entire_file(font_file_path);
@@ -70,7 +71,7 @@ static struct sb_bitmap* sb_bitmap_font(width, height) {
 	uint8_t* data = (uint8_t*)(font_file->data);
 
 	/* gets all characters from SPC - ~ (includes a-Z 0-9) */
-	stbtt_BakeFontBitmap(data, 0, FONT_SCALE * 2.0f, bitmap->data, bitmap->width, bitmap->height, ' ', ('~' - ' ')+1, &cdata[0]);
+	stbtt_BakeFontBitmap(data, 0, FONT_SCALE, bitmap->data, bitmap->width, bitmap->height, ' ', ('~' - ' ')+1, &cdata[0]);
 
 	return bitmap;
 }
@@ -79,6 +80,28 @@ static void sb_bitmap_free(struct sb_bitmap* font) {
 	assert(font != NULL && font->data != NULL && "Font and Font data need to be valid pointers");
 	free(font->data);
 	free(font);
+}
+
+struct sb_bitmap* make_bitmap_font(int* texture, int width, int height) {
+	assert(texture != NULL && width > 0 && height > 0);
+	glGenTextures(1, texture);
+
+	/* generate bitmap font texture */
+	struct sb_bitmap* font = sb_bitmap_font(width, height);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, *texture);
+
+	/* default assumes 4byte alignment */
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, font->width, font->height, 0, GL_RED, GL_UNSIGNED_BYTE, font->data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	return font;
 }
 
 struct sb_render_group {
@@ -113,7 +136,7 @@ static struct sb_debug_cycle_counter sb_debug_cycle_counters[SB_DEBUG_CYCLE_COUN
 /* potentially 1k characters */
 static float debug_text_vert_buffer[1024 * 30];
 
-static float atY = FONT_SCALE + 2;
+static float atY = HALF_FONT_SCALE + 2;
 static float atX = 2;
 static int num_text_lines = 0;
 static int num_of_chars = 0;
@@ -184,7 +207,7 @@ static void sb_debug_render_text(const char* string, struct sb_bitmap* font) {
 	}
 
 	/* move down a single line of text + 5 pixels */
-	atY += (num_text_lines + 10 + FONT_SCALE);
+	atY += (num_text_lines + FONT_SCALE);
 	atX = 2;
 	++num_text_lines;
 }
@@ -223,12 +246,13 @@ static struct sb_render_group debug_render_group = { 0 };
 void update(float dt) {
 }
 
-void my_draw() {
+static void my_draw() {
 	glClearColor(210.f / 255.f, 230.f / 255.f, 1.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	shader_use(&render_group.shader_info);
 	glBindBuffer(GL_ARRAY_BUFFER, render_group.vbo);
+	glBindTexture(GL_TEXTURE_2D, render_group.texture);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
@@ -251,14 +275,58 @@ void my_draw() {
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
+GLsync fence = 0;
+static void debug_draw() {
+	mat4x4 ident; mat4x4_identity(ident);
+	glUseProgram(debug_render_group.shader_info.program);
+	glBindBuffer(GL_ARRAY_BUFFER, debug_render_group.vbo);
+	glBindTexture(GL_TEXTURE_2D, debug_render_group.texture);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+	int text_quad_buff_size = 30 * num_of_chars * sizeof(float);
+
+	void* old_data = glMapBufferRange(GL_ARRAY_BUFFER, 0, text_quad_buff_size, GL_MAP_WRITE_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+
+	/* force the data to be available */
+	glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
+
+	/* update verts and tex coords */
+	memcpy(old_data, debug_text_vert_buffer, text_quad_buff_size);
+
+	glFlushMappedBufferRange(GL_ARRAY_BUFFER, 0, text_quad_buff_size);
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+
+	/* this projection is orthographic with left-top 0,0, right-bttom width, height coordinates */
+	int location = glGetUniformLocation(debug_render_group.shader_info.program, "projection");
+	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)debug_render_group.projection);
+
+	location = glGetUniformLocation(debug_render_group.shader_info.program, "model");
+	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)ident);
+
+	location = glGetUniformLocation(debug_render_group.shader_info.program, "view");
+	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)ident);
+
+	/* draw all text */
+	glDrawArrays(GL_TRIANGLES, 0, 6 * num_of_chars);
+
+	fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
+	num_text_lines = 0;
+	num_of_chars = 0;
+	atX = 2;
+	atY = HALF_FONT_SCALE + 2;
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
 #if defined(_WIN32) && 0
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR     lpCmdLine,
 	int       nCmdShow) {
 #else
-GLsync fence = 0;
 int main(int argc, char** argv) {
 #endif
-
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_DisplayMode info;
 
@@ -333,15 +401,35 @@ int main(int argc, char** argv) {
 		version,
 		glsl_ver);
 
+	struct sb_bitmap* font = make_bitmap_font(&debug_render_group.texture, BITMAP_WIDTH, BITMAP_HEIGHT);
+
+	shader_compile(&debug_render_group.shader_info, "model", "shaders/simple_vert.glsl", "shaders/text_frag.glsl");
 	shader_compile(&render_group.shader_info, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
-	debug_render_group.shader_info.program = render_group.shader_info.program;
+
+	glGenTextures(1, &render_group.texture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, render_group.texture);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
+
+	int x, y, comp;
+	x = y = comp = 0;
+	unsigned char* texture_data = stbi_load("Gray_granite_pxr128.png", &x, &y, &comp, 4);
+	fprintf(stderr, "Image x: %d, y: %d, comps: %d\n", x, y, comp);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	mat4x4_identity(&render_group.projection);
 
 	float aspect = (float)window_width / (float)window_height;
 
 	/* normal ortho projection from -1,1 is TL and 1.0,-1.0 is BR */
-	mat4x4_perspective(&render_group.projection, deg2rad(45), aspect, 0.001f, 1000.0f);
+	mat4x4_perspective(&render_group.projection, deg2rad(45.0f), aspect, 0.001f, 1000.0f);
 	mat4x4_ortho(&debug_render_group.projection, 0, window_width, window_height, 0.0, 1.0, -1.0);
 
 	glEnable(GL_BLEND);
@@ -352,21 +440,6 @@ int main(int argc, char** argv) {
 
 	int pos_attr = glGetAttribLocation(render_group.shader_info.program, "in_position");
 	int uv_attr = glGetAttribLocation(render_group.shader_info.program, "in_tex");
-
-	glGenTextures(1, &render_group.texture);
-
-	/* generate bitmap font texture */
-	struct sb_bitmap* font = sb_bitmap_font(BITMAP_WIDTH, BITMAP_HEIGHT);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, render_group.texture);
-
-	/* default assumes 4byte alignment */
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, font->width, font->height, 0, GL_RED, GL_UNSIGNED_BYTE, font->data);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
-	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glGenBuffers(1, &render_group.vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, render_group.vbo);
@@ -382,6 +455,7 @@ int main(int argc, char** argv) {
 		-0.5,  0.5,  0,  0, 0,
 		 0.5,  0.5,  0,  1, 0,
 		 0.5, -0.5,  0,  1, 1,
+
 		 0.5, -0.5,  0,  1, 1,
 		-0.5, -0.5,  0,  0, 1,
 		-0.5,  0.5,  0,  0, 0
@@ -450,45 +524,7 @@ int main(int argc, char** argv) {
 		sb_debug_overlay_cycle_counters(font);
 
 		/* render debug text */
-		glBindBuffer(GL_ARRAY_BUFFER, debug_render_group.vbo);
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-
-		int text_quad_buff_size = 30 * num_of_chars * sizeof(float);
-
-		void* old_data = glMapBufferRange(GL_ARRAY_BUFFER, 0, text_quad_buff_size, GL_MAP_WRITE_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
-
-		/* force the data to be available */
-		glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
-
-		/* update verts and tex coords */
-		memcpy(old_data, debug_text_vert_buffer, text_quad_buff_size);
-		
-		glFlushMappedBufferRange(GL_ARRAY_BUFFER, 0, text_quad_buff_size);
-		glUnmapBuffer(GL_ARRAY_BUFFER);
-
-		/* this projection is orthographic with left-top 0,0, right-bttom width, height coordinates */
-		int location = glGetUniformLocation(debug_render_group.shader_info.program, "projection");
-		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)debug_render_group.projection);
-
-		location = glGetUniformLocation(debug_render_group.shader_info.program, "model");
-		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)ident);
-
-		location = glGetUniformLocation(debug_render_group.shader_info.program, "view");
-		glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)ident);
-		
-		/* draw all text */
-		glDrawArrays(GL_TRIANGLES, 0, 6 * num_of_chars);
-
-		fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-		
-		num_text_lines = 0;
-		num_of_chars = 0;
-		atX = 2;
-		atY = FONT_SCALE + 2;
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		debug_draw();
 
 		SDL_GL_SwapWindow(screen);
 	}
