@@ -440,13 +440,13 @@ int main(int argc, char** argv) {
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	mat4x4_identity(&render_group.projection);
+	mat4x4_identity(render_group.projection);
 
 	float aspect = (float)window_width / (float)window_height;
 
 	/* normal ortho projection from -1,1 is TL and 1.0,-1.0 is BR */
-	mat4x4_perspective(&render_group.projection, deg2rad(45.0f), aspect, 0.001f, 1000.0f);
-	mat4x4_ortho(&debug_render_group.projection, 0, window_width, window_height, 0.0, 1.0, -1.0);
+	mat4x4_perspective(render_group.projection, deg2rad(45.0f), aspect, 0.001f, 1000.0f);
+	mat4x4_ortho(debug_render_group.projection, 0, window_width, window_height, 0.0, 1.0, -1.0);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
