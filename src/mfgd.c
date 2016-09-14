@@ -163,7 +163,7 @@ static void sb_debug_render_text(const char* string, struct sb_bitmap* font) {
 	vert format is x, y, z, s, t - starting at top left and renders clockwise
 	*/
 	int i = num_of_chars * 30; // there are 30 floats per quad
-	for (char* c = string; *c; ++c) {
+	for (char* c = (char*)string; *c; ++c) {
 		/* only supports the ASCII printable character code points */
 		if (*c >= 32 && *c < 128) {
 			stbtt_aligned_quad quad;
@@ -271,18 +271,24 @@ static void my_draw() {
 	int location = glGetUniformLocation(render_group.shader_info.program, "projection");
 	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)render_group.projection);
 
-	location = glGetUniformLocation(render_group.shader_info.program, "model");
-	mat4x4 ident;  mat4x4_identity(&ident);
-	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)ident);
-
 	location = glGetUniformLocation(render_group.shader_info.program, "view");
 	vec3 eye = { 0.0f, 0.0, 3.0f };
 	vec3 point = { 0.0f, 0.0f, 0.0f };
 	vec3 up = { 0.0, 1.0f, 0.0f };
-	mat4x4_look_at(ident, eye, point, up);
-	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)ident);
+	mat4x4 view;  mat4x4_identity(view);
+	mat4x4_look_at(view, eye, point, up);
+	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)view);
 
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	location = glGetUniformLocation(render_group.shader_info.program, "model");
+	mat4x4 model;
+	for (int y = 0; y < 3; ++y) {
+		for (int x = 0; x < 3; ++x) {
+			mat4x4_identity(model);
+			mat4x4_translate_in_place(model, -1 + x, 1 - y, 0);
+			glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)model);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+	}
 }
 
 GLsync fence = 0;
@@ -462,13 +468,13 @@ int main(int argc, char** argv) {
 	const float vertices[] =
 	{
 	/*   x     y     z	 s  t   */
-		-0.5,  0.5,  0,  0, 0,
-		 0.5,  0.5,  0,  1, 0,
-		 0.5, -0.5,  0,  1, 1,
+		-0.15,  0.15,  0,  0, 0,
+		 0.15,  0.15,  0,  1, 0,
+		 0.15, -0.15,  0,  1, 1,
 
-		 0.5, -0.5,  0,  1, 1,
-		-0.5, -0.5,  0,  0, 1,
-		-0.5,  0.5,  0,  0, 0
+		 0.15, -0.15,  0,  1, 1,
+		-0.15, -0.15,  0,  0, 1,
+		-0.15,  0.15,  0,  0, 0
 	};
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
