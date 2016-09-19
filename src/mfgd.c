@@ -378,7 +378,7 @@ int main(int argc, char** argv) {
 
 	/* initialize a render context, managed by SDL */
 	SDL_GLContext *opengl_context = SDL_GL_CreateContext(screen);
-	SDL_GL_SetSwapInterval(1);
+	SDL_GL_SetSwapInterval(-1);
 
 	GLenum err = glGetError();
 	if (err != 0) {
