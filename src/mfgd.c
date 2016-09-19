@@ -482,7 +482,7 @@ int main(int argc, char** argv) {
 	const float center_yoff = (window_height / 2.0);
 
 	const float vertices[] = {
-	/*   x     y     z	 s  t   */
+	/*   x                       y                         z   s  t   */
 		center_xoff - quad_size, center_yoff - quad_size,  0,  0, 0,
 		center_xoff + quad_size, center_yoff - quad_size,  0,  1, 0,
 		center_xoff + quad_size, center_yoff + quad_size,  0,  1, 1,
