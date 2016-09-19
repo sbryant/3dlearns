@@ -115,6 +115,8 @@ struct sb_bitmap* make_bitmap_font(int* texture, int width, int height) {
 }
 
 struct sb_render_group {
+	int screen_width;
+	int screen_height;
 	shader shader_info;
 	int vao;
 	int vbo;
@@ -256,6 +258,8 @@ static struct sb_render_group debug_render_group = { 0 };
 void update(float dt) {
 }
 
+#define TILE_SIZE 30
+
 static void my_draw() {
 	glClearColor(210.f / 255.f, 230.f / 255.f, 1.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -277,14 +281,18 @@ static void my_draw() {
 
 	location = glGetUniformLocation(render_group.shader_info.program, "model");
 	mat4x4 model;
-	for (int y = 0; y < 3; ++y) {
-		for (int x = 0; x < 3; ++x) {
+	for(int y = 0; y < 10; ++y)
+		for (int x = 0; x < 19; ++x) {
 			mat4x4_identity(model);
-			mat4x4_translate_in_place(model, -1 + x, 1 - y, 0);
+
+			float top_left_x = (render_group.screen_width / 2.0) - TILE_SIZE;
+			float top_left_y = (render_group.screen_height / 2.0) - TILE_SIZE;
+
+			mat4x4_translate_in_place(model, (-top_left_x + 15) + (x * TILE_SIZE*2.2), (-top_left_y + TILE_SIZE * 1.5) + (y * TILE_SIZE * 2.2), 0.0f);
 			glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)model);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
-	}
+
 }
 
 GLsync fence = 0;
@@ -445,6 +453,9 @@ int main(int argc, char** argv) {
 	mat4x4_ortho(render_group.projection, 0, window_width, window_height, 0.0, 1.0, -1.0);
 	mat4x4_ortho(debug_render_group.projection, 0, window_width, window_height, 0.0, 1.0, -1.0);
 
+	render_group.screen_height = window_height;
+	render_group.screen_width = window_width;
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -462,16 +473,19 @@ int main(int argc, char** argv) {
 	glVertexAttribPointer(uv_attr, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(uv_attr);
 
-	const float vertices[] =
-	{
-	/*   x     y     z	 s  t   */
-		-0.15,  0.15,  0,  0, 0,
-		 0.15,  0.15,  0,  1, 0,
-		 0.15, -0.15,  0,  1, 1,
+	int quad_size = TILE_SIZE;
+	const float center_xoff = (window_width / 2.0);
+	const float center_yoff = (window_height / 2.0);
 
-		 0.15, -0.15,  0,  1, 1,
-		-0.15, -0.15,  0,  0, 1,
-		-0.15,  0.15,  0,  0, 0
+	const float vertices[] = {
+	/*   x     y     z	 s  t   */
+		center_xoff - quad_size, center_yoff - quad_size,  0,  0, 0,
+		center_xoff + quad_size, center_yoff - quad_size,  0,  1, 0,
+		center_xoff + quad_size, center_yoff + quad_size,  0,  1, 1,
+
+		center_xoff + quad_size, center_yoff + quad_size,  0,  1, 1,
+		center_xoff - quad_size, center_yoff + quad_size,  0,  0, 1,
+		center_xoff - quad_size, center_yoff - quad_size,  0,  0, 0
 	};
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
