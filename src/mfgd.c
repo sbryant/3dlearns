@@ -272,11 +272,7 @@ static void my_draw() {
 	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)render_group.projection);
 
 	location = glGetUniformLocation(render_group.shader_info.program, "view");
-	vec3 eye = { 0.0f, 0.0, 3.0f };
-	vec3 point = { 0.0f, 0.0f, 0.0f };
-	vec3 up = { 0.0, 1.0f, 0.0f };
 	mat4x4 view;  mat4x4_identity(view);
-	mat4x4_look_at(view, eye, point, up);
 	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)view);
 
 	location = glGetUniformLocation(render_group.shader_info.program, "model");
@@ -445,7 +441,8 @@ int main(int argc, char** argv) {
 	float aspect = (float)window_width / (float)window_height;
 
 	/* normal ortho projection from -1,1 is TL and 1.0,-1.0 is BR */
-	mat4x4_perspective(render_group.projection, deg2rad(45.0f), aspect, 0.001f, 1000.0f);
+	//mat4x4_perspective(render_group.projection, deg2rad(45.0f), aspect, 0.001f, 1000.0f);
+	mat4x4_ortho(render_group.projection, 0, window_width, window_height, 0.0, 1.0, -1.0);
 	mat4x4_ortho(debug_render_group.projection, 0, window_width, window_height, 0.0, 1.0, -1.0);
 
 	glEnable(GL_BLEND);
