@@ -258,7 +258,10 @@ static struct sb_render_group debug_render_group = { 0 };
 void update(float dt) {
 }
 
-#define TILE_SIZE 30
+#define TILE_SIZE 60
+#define TILE_PAD 1.05
+#define TILEMAP_WIDTH 20
+#define TILEMAP_HEIGHT 10
 
 static void my_draw() {
 	glClearColor(210.f / 255.f, 230.f / 255.f, 1.f, 1.f);
@@ -281,14 +284,15 @@ static void my_draw() {
 
 	location = glGetUniformLocation(render_group.shader_info.program, "model");
 	mat4x4 model;
-	for(int y = 0; y < 10; ++y)
-		for (int x = 0; x < 19; ++x) {
+
+	/* shift back to the upper left corner and offset a bit */
+	float top_left_x = -(render_group.screen_width / 2.0) + TILE_SIZE * 0.70;
+	float top_left_y = -(render_group.screen_height / 2.0) + TILE_SIZE * 1.5;
+
+	for(int y = 0; y < TILEMAP_HEIGHT; ++y)
+		for (int x = 0; x < TILEMAP_WIDTH; ++x) {
 			mat4x4_identity(model);
-
-			float top_left_x = (render_group.screen_width / 2.0) - TILE_SIZE;
-			float top_left_y = (render_group.screen_height / 2.0) - TILE_SIZE;
-
-			mat4x4_translate_in_place(model, (-top_left_x + 15) + (x * TILE_SIZE*2.2), (-top_left_y + TILE_SIZE * 1.5) + (y * TILE_SIZE * 2.2), 0.0f);
+			mat4x4_translate_in_place(model, (top_left_x) + (x * TILE_SIZE * TILE_PAD), (top_left_y) + (y * TILE_SIZE * TILE_PAD), 0.0f);
 			glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)model);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
@@ -473,7 +477,7 @@ int main(int argc, char** argv) {
 	glVertexAttribPointer(uv_attr, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(uv_attr);
 
-	int quad_size = TILE_SIZE;
+	int quad_size = TILE_SIZE / 2.0;
 	const float center_xoff = (window_width / 2.0);
 	const float center_yoff = (window_height / 2.0);
 
