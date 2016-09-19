@@ -252,7 +252,7 @@ static void sb_debug_overlay_cycle_counters(struct sb_bitmap* font) {
 		}
 	}
 }
-static struct sb_render_group render_group = { 0 };
+static struct sb_render_group main_render_group = { 0 };
 static struct sb_render_group debug_render_group = { 0 };
 
 void update(float dt) {
@@ -263,40 +263,43 @@ void update(float dt) {
 #define TILEMAP_WIDTH 20
 #define TILEMAP_HEIGHT 10
 
+void draw_tile_map(struct sb_render_group* render_group, int tile_size, int num_x, int num_y, float pad) {
+	int location = glGetUniformLocation(render_group->shader_info.program, "model");
+	mat4x4 model;
+
+	/* shift back to the upper left corner and offset a bit */
+	float top_left_x = -(render_group->screen_width / 2.0) + tile_size * 0.70;
+	float top_left_y = -(render_group->screen_height / 2.0) + tile_size * 1.5;
+
+	for (int y = 0; y < num_y; ++y)
+		for (int x = 0; x < num_x; ++x) {
+			mat4x4_identity(model);
+			mat4x4_translate_in_place(model, (top_left_x)+(x * tile_size * pad), (top_left_y)+(y * tile_size * pad), 0.0f);
+			glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)model);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+}
+
 static void my_draw() {
 	glClearColor(210.f / 255.f, 230.f / 255.f, 1.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	shader_use(&render_group.shader_info);
-	glBindBuffer(GL_ARRAY_BUFFER, render_group.vbo);
-	glBindTexture(GL_TEXTURE_2D, render_group.texture);
+	shader_use(&main_render_group.shader_info);
+	glBindBuffer(GL_ARRAY_BUFFER, main_render_group.vbo);
+	glBindTexture(GL_TEXTURE_2D, main_render_group.texture);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	
-	int location = glGetUniformLocation(render_group.shader_info.program, "projection");
-	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)render_group.projection);
+	int location = glGetUniformLocation(main_render_group.shader_info.program, "projection");
+	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)main_render_group.projection);
 
-	location = glGetUniformLocation(render_group.shader_info.program, "view");
+	location = glGetUniformLocation(main_render_group.shader_info.program, "view");
 	mat4x4 view;  mat4x4_identity(view);
 	glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)view);
 
-	location = glGetUniformLocation(render_group.shader_info.program, "model");
-	mat4x4 model;
-
-	/* shift back to the upper left corner and offset a bit */
-	float top_left_x = -(render_group.screen_width / 2.0) + TILE_SIZE * 0.70;
-	float top_left_y = -(render_group.screen_height / 2.0) + TILE_SIZE * 1.5;
-
-	for(int y = 0; y < TILEMAP_HEIGHT; ++y)
-		for (int x = 0; x < TILEMAP_WIDTH; ++x) {
-			mat4x4_identity(model);
-			mat4x4_translate_in_place(model, (top_left_x) + (x * TILE_SIZE * TILE_PAD), (top_left_y) + (y * TILE_SIZE * TILE_PAD), 0.0f);
-			glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)model);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-		}
-
+	draw_tile_map(&main_render_group, TILE_SIZE, TILEMAP_WIDTH, TILEMAP_HEIGHT, TILE_PAD);
 }
 
 GLsync fence = 0;
@@ -428,11 +431,11 @@ int main(int argc, char** argv) {
 	struct sb_bitmap* font = make_bitmap_font(&debug_render_group.texture, BITMAP_WIDTH, BITMAP_HEIGHT);
 
 	shader_compile(&debug_render_group.shader_info, "model", "shaders/simple_vert.glsl", "shaders/text_frag.glsl");
-	shader_compile(&render_group.shader_info, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
+	shader_compile(&main_render_group.shader_info, "model", "shaders/simple_vert.glsl", "shaders/simple_frag.glsl");
 
-	glGenTextures(1, &render_group.texture);
+	glGenTextures(1, &main_render_group.texture);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, render_group.texture);
+	glBindTexture(GL_TEXTURE_2D, main_render_group.texture);
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
 
@@ -448,29 +451,29 @@ int main(int argc, char** argv) {
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	mat4x4_identity(render_group.projection);
+	mat4x4_identity(main_render_group.projection);
 
 	float aspect = (float)window_width / (float)window_height;
 
 	/* normal ortho projection from -1,1 is TL and 1.0,-1.0 is BR */
 	//mat4x4_perspective(render_group.projection, deg2rad(45.0f), aspect, 0.001f, 1000.0f);
-	mat4x4_ortho(render_group.projection, 0, window_width, window_height, 0.0, 1.0, -1.0);
+	mat4x4_ortho(main_render_group.projection, 0, window_width, window_height, 0.0, 1.0, -1.0);
 	mat4x4_ortho(debug_render_group.projection, 0, window_width, window_height, 0.0, 1.0, -1.0);
 
-	render_group.screen_height = window_height;
-	render_group.screen_width = window_width;
+	main_render_group.screen_height = window_height;
+	main_render_group.screen_width = window_width;
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glGenVertexArrays(1, &render_group.vao);
-	glBindVertexArray(render_group.vao);
+	glGenVertexArrays(1, &main_render_group.vao);
+	glBindVertexArray(main_render_group.vao);
 
-	int pos_attr = glGetAttribLocation(render_group.shader_info.program, "in_position");
-	int uv_attr = glGetAttribLocation(render_group.shader_info.program, "in_tex");
+	int pos_attr = glGetAttribLocation(main_render_group.shader_info.program, "in_position");
+	int uv_attr = glGetAttribLocation(main_render_group.shader_info.program, "in_tex");
 
-	glGenBuffers(1, &render_group.vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, render_group.vbo);
+	glGenBuffers(1, &main_render_group.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, main_render_group.vbo);
 	glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
 	glEnableVertexAttribArray(pos_attr);
 
@@ -562,11 +565,11 @@ int main(int argc, char** argv) {
 
 	sb_bitmap_free(font);
 
-	glDeleteBuffers(1, &render_group.vbo);
+	glDeleteBuffers(1, &main_render_group.vbo);
 	glDeleteBuffers(1, &debug_render_group.vbo);
 	glDeleteBuffers(1, &debug_render_group.texture);
-	glDeleteVertexArrays(1, &render_group.vao);
-	shader_cleanup(&render_group.shader_info);
+	glDeleteVertexArrays(1, &main_render_group.vao);
+	shader_cleanup(&main_render_group.shader_info);
 
 	SDL_GL_DeleteContext(opengl_context);
 	SDL_DestroyWindow(screen);
