@@ -20,6 +20,12 @@
 
 #define LINMATH_H_DEFINE_VEC(n) \
 typedef float vec##n[n]; \
+static inline void vec##n##_dup(vec##n d, vec##n const s) \
+{ \
+	int i; \
+	for(i = 0; i<n; ++i) \
+		d[i] = s[i]; \
+} \
 static inline void vec##n##_add(vec##n r, vec##n const a, vec##n const b) \
 { \
 	int i; \
